@@ -30,3 +30,6 @@
 # Vim files
 .ycm_extra_conf.py
 .ycm_extra_conf.pyc
+
+# Cmake build directory
+build*/*
