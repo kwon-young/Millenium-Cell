@@ -5,12 +5,13 @@ cell morphogenesis simulation
 
 Make sure you have installed all the dependencies :
 
-CMake
-Boost
-VTK
+* CMake
+* Boost
+* VTK
 
 There may be other dependencies.
 If you have build error with undefined reference, search the web for the missing libraries and install them.
+Please add them to the list of dependencies above.
 
 ```
 git clone https://github.com/kwon-young/Millenium-Cell.git
