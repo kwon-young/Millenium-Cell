@@ -17,7 +17,6 @@ int main()
   //Count the number of vertices added in each timestep
   unsigned int countVerticesPerTime;
 
-  caca
   //record each timestep's number of vertices
   vector<unsigned int> verticesPerTimestep;
 
