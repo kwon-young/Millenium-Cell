@@ -1,18 +1,18 @@
 cmake_minimum_required(VERSION 2.8)
 
-project (Viab-Cell2)
+project (Millenium-Cell)
 set (VTK_DIR "/Users/Musky/Dev/VTK-6.3.0-build/")
 
 find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})
 
-add_executable(Viab-Cell2  src/environment.cpp src/main.cpp)
+add_executable(Millenium-Cell  src/environment.cpp src/main.cpp)
 
 
 if(VTK_LIBRARIES)
-  target_link_libraries(Viab-Cell2 ${VTK_LIBRARIES})
+  target_link_libraries(Millenium-Cell ${VTK_LIBRARIES})
 else()
-  target_link_libraries(Viab-Cell2 vtkHybrid vtkWidgets)
+  target_link_libraries(Millenium-Cell vtkHybrid vtkWidgets)
 endif()
 
 
@@ -30,7 +30,7 @@ INCLUDE_DIRECTORIES(
   ${Boost_INCLUDE_DIRS}
   )
 
-#add_executable(Viab-Cell2 src/environment.cpp src/main.cpp)
+#add_executable(Millenium-Cell src/environment.cpp src/main.cpp)
 
 
 # Boost and its components
