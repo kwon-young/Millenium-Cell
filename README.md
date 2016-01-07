@@ -1,3 +1,7 @@
+# Millenium-Cell
+
+[![Travis Build Status](https://travis-ci.org/kwon-young/Millenium-Cell.svg)](https://travis-ci.org/kwon-young/Millenium-Cell)
+
 # What is Millenium-Cell
 
 Millenium-Cell is a cell morphogenesis simulation. It's a student project.
