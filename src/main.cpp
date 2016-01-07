@@ -10,9 +10,20 @@ using namespace std;
 
 //#include <C:/Users/info/Desktop/Viab-Cell/environment.h>
 #include "environment.h"
+#include <vtkRenderer.h>
+#include <vtkRenderWindow.h>
 
 int main()
 {
+  vtkRenderWindow *renwin = vtkRenderWindow::New();
+  vtkRenderer *ren1 = vtkRenderer::New();
+  renwin->AddRenderer(ren1);
+  vtkPolyDataMapper *map = vtkPolyDataMaper::New();
+  vtkActor *actor = vtkActor::New();
+  actor->SetMapper(map);
+  ren1->AddActor(actor);
+  renwin->Render();
+
   // Count the number of vertices added in each timestep
   unsigned int countVerticesPerTime;
 
@@ -32,7 +43,11 @@ int main()
 
   unsigned int firstPos = 55; // Specify the first cell's position
 
+<<<<<<< Updated upstream
   unsigned int maxCell = 8; // Defining the max cells to reach for final forms
+=======
+  unsigned int maxCell = 6; // Defining the max cells to reach for final forms
+>>>>>>> Stashed changes
 
   // Dimensions of the grid
   unsigned int width = 10;
