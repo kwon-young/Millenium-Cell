@@ -8,24 +8,9 @@
 
 //#include <C:/Users/info/Desktop/Viab-Cell/environment.h>
 #include "environment.h"
-#include <vtkRenderer.h>
-#include <vtkRenderWindow.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkConeSource.h>
 
 int main()
 {
-  //vtkRenderWindow *renwin = vtkRenderWindow::New();
-  //vtkRenderer *ren1 = vtkRenderer::New();
-  //renwin->AddRenderer(ren1);
-  //vtkConeSource *cone = vtkConeSource::New();
-  //cone->SetResolution(8);
-  //vtkPolyDataMapper *map = vtkPolyDataMapper::New();
-  //map->SetInputData(cone->GetOutput());
-  //vtkActor *actor = vtkActor::New();
-  //actor->SetMapper(map);
-  //ren1->AddActor(actor);
-  //renwin->Render();
 
   // Count the number of vertices added in each timestep
   unsigned int countVerticesPerTime;
