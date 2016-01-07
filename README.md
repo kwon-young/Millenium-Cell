@@ -13,6 +13,9 @@ Make sure you have installed all the dependencies :
 * CMake
 * Boost
 * VTK
+
+Additionnal dependency if you are building on ArchLinux :
+
 * HDF5
 * ODBC
 * OpenMPI
