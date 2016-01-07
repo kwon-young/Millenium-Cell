@@ -3,18 +3,10 @@ language: cpp
 compiler:
     - gcc
     - clang
-addons:
-  apt:
-    sources:
-    - boost-latest
-    packages:
-    - gcc-4.8
-    - g++-4.8
-    - cmake
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -y libvtk5-dev
+  - sudo apt-get install -y libvtk5-dev libboost-all-dev
   
 before_script:  
     - mkdir build
