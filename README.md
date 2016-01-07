@@ -34,3 +34,19 @@ make
 ./Millenium-Cell
 ```
 
+* Coding style
+
+The coding style is define in the `.clang-format`. Make sure to use `clang-format` command or use `git clang-format` if available before each commit. Moreover, It's a good idea to set it as a pre-commit action in `.git/hooks/pre-commit` as below. Don't forget to set it executable.
+
+```python
+#!/usr/bin/env python
+
+import subprocess
+output = subprocess.check_output(["git", "clang-format", "--diff"])
+
+if output not in ['no modified files to format\n', 'clang-format did not modify any files\n']:
+    print("Run git clang-format, then commit.\n")
+    exit(1)
+else:
+    exit(0)
+```

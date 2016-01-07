@@ -4,4 +4,4 @@ IndentWidth: 2
 BreakBeforeBraces: Linux
 AllowShortIfStatementsOnASingleLine: true
 IndentCaseLabels: true
-
+SpacesInAngles: true
