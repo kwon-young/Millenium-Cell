@@ -8,6 +8,11 @@ include(${VTK_USE_FILE})
 
 add_executable(Millenium-Cell  src/environment.cpp src/main.cpp)
 
+ 
+IF(BOOST)
+FIND_PACKAGE(Boost REQUIRED)
+ENDIF(BOOST)
+
 
 if(VTK_LIBRARIES)
   target_link_libraries(Millenium-Cell ${VTK_LIBRARIES})
@@ -16,12 +21,7 @@ else()
 endif()
 
 
-
 set( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true )
- 
-IF(BOOST)
-FIND_PACKAGE(Boost REQUIRED)
-ENDIF(BOOST)
 
 # Include directories
 
