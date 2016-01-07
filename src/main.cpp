@@ -8,6 +8,7 @@
 
 //#include <C:/Users/info/Desktop/Viab-Cell/environment.h>
 #include "environment.h"
+#include "Cell.hpp"
 
 int main()
 {

@@ -50,3 +50,10 @@ if output not in ['no modified files to format\n', 'clang-format did not modify 
 else:
     exit(0)
 ```
+
+# TODO
+
+* What reactive to use
+* How to code a reaction
+* How to represent reactive concentration (global vs local)
+* How to model an energetic system
