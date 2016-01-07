@@ -6,32 +6,35 @@
 
 #include <iostream>
 
-using namespace std;
-
 //#include <C:/Users/info/Desktop/Viab-Cell/environment.h>
 #include "environment.h"
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkConeSource.h>
 
 int main()
 {
-  vtkRenderWindow *renwin = vtkRenderWindow::New();
-  vtkRenderer *ren1 = vtkRenderer::New();
-  renwin->AddRenderer(ren1);
-  vtkPolyDataMapper *map = vtkPolyDataMaper::New();
-  vtkActor *actor = vtkActor::New();
-  actor->SetMapper(map);
-  ren1->AddActor(actor);
-  renwin->Render();
+  //vtkRenderWindow *renwin = vtkRenderWindow::New();
+  //vtkRenderer *ren1 = vtkRenderer::New();
+  //renwin->AddRenderer(ren1);
+  //vtkConeSource *cone = vtkConeSource::New();
+  //cone->SetResolution(8);
+  //vtkPolyDataMapper *map = vtkPolyDataMapper::New();
+  //map->SetInputData(cone->GetOutput());
+  //vtkActor *actor = vtkActor::New();
+  //actor->SetMapper(map);
+  //ren1->AddActor(actor);
+  //renwin->Render();
 
   // Count the number of vertices added in each timestep
   unsigned int countVerticesPerTime;
 
   // record each timestep's number of vertices
-  vector< unsigned int > verticesPerTimestep;
+  std::vector< unsigned int > verticesPerTimestep;
 
   // Map regrouping same number of cells vertices
-  map< unsigned int, vector< unsigned int > > verticesPerNbCell;
+  std::map<unsigned int, std::vector<unsigned int> > verticesPerNbCell;
 
   Graph g;               // defining a graph
   unsigned int timestep; // Records the timesteps
@@ -43,11 +46,7 @@ int main()
 
   unsigned int firstPos = 55; // Specify the first cell's position
 
-<<<<<<< Updated upstream
-  unsigned int maxCell = 8; // Defining the max cells to reach for final forms
-=======
   unsigned int maxCell = 6; // Defining the max cells to reach for final forms
->>>>>>> Stashed changes
 
   // Dimensions of the grid
   unsigned int width = 10;
@@ -91,7 +90,7 @@ int main()
   //  boost::add_vertex(form1,catalog);
 
   // contains all forms to compare with at the first crossing conraints
-  //  vector<unsigned int> formCatalog4;
+  //  std::vector<unsigned int> formCatalog4;
   //
   //  for(unsigned int i = 0; i < boost::num_vertices(catalog); i++)
   //    formCatalog4.push_back(i);
@@ -100,7 +99,7 @@ int main()
   //  boost::add_vertex(form2,catalog);
 
   // contains all forms to compare with at the second crossing conraints
-  //  vector<unsigned int> formCatalog8;
+  //  std::vector<unsigned int> formCatalog8;
   //
   //  for(unsigned int i = formCatalog4.size(); i <
   //  boost::num_vertices(catalog); i++ )
