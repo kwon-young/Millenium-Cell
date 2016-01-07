@@ -11,7 +11,7 @@ addons:
     - gcc-4.8
     - g++-4.8
     - cmake
-    - libvtk5-dev
+    - libvtkgdcm-cil
     
 before_script:  
     - mkdir build
