@@ -63,7 +63,7 @@ void Form::convertPointGrid()
   _pointsStructuredGrid->SetPoints(_points);
 
 #if VTK_MAJOR_VERSION <= 5
-  _pointsGeometryFilter->SetInputConnection(structuredGrid->GetProducerPort());
+  _pointsGeometryFilter->SetInputConnection(_pointsStructuredGrid->GetProducerPort());
 #else
   _pointsGeometryFilter->SetInputData(_pointsStructuredGrid);
 #endif
