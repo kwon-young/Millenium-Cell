@@ -10,7 +10,7 @@ set(BOOST_ROOT ${BOOST_ROOT_DIR})
 find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})
 
-add_executable(Millenium-Cell  src/environment.cpp src/main.cpp)
+add_executable(Millenium-Cell  src/Graphics.cpp src/environment.cpp src/main.cpp)
 
 IF(BOOST)
 FIND_PACKAGE(Boost REQUIRED)
