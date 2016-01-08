@@ -34,7 +34,7 @@ int main()
 
   unsigned int firstPos = 55; // Specify the first cell's position
 
-  unsigned int maxCell = 6; // Defining the max cells to reach for final forms
+  unsigned int maxCell = 7; // Defining the max cells to reach for final forms
 
   // Dimensions of the grid
   unsigned int width = 10;
@@ -108,18 +108,6 @@ int main()
 
   formContainer.set(firstPos); // set position
 
-  std::vector<unsigned int> dim(3);
-  dim[0] = width;
-  dim[1] = height;
-  dim[2] = 1;
-  Form myForm(formContainer, dim);
-  std::vector<double> bgColor(3);
-  bgColor[0] = 2;
-  bgColor[1] = 3;
-  bgColor[2] = 4;
-  Env myEnv(bgColor);
-  myEnv.addForm(myForm);
-  myEnv.renderStart();
 
   timestep = 0;
 
@@ -318,5 +306,31 @@ int main()
   //      graphFile<<endl<<endl<<endl;
   //  }
 
+  vertexPair_prev = vertices(g);
+  for (int i = 0; i < 196; ++i) {
+    ++vertexPair_prev.first;
+  }
+  boost::dynamic_bitset<> gform = g[*vertexPair_prev.first];
+  boost::dynamic_bitset<> form(10*10*2, 0);
+  for (int i = 0; i < 100; ++i) {
+    form[i] = gform[i];
+    //std::cout << form[i];
+    //if (!(i%10) && i!=0)
+      //std::cout << std::endl;
+  }
+  std::vector<unsigned int> dim(3);
+  dim[0] = 10;
+  dim[1] = 10;
+  dim[2] = 2;
+  Form myForm(form, dim);
+
+  std::vector<double> bgColor(3);
+  bgColor[0] = .2;
+  bgColor[1] = .3;
+  bgColor[2] = .4;
+  Env myEnv(bgColor);
+  myEnv.addForm(&myForm);
+  myEnv.renderStart();
+  
   return EXIT_SUCCESS;
 }

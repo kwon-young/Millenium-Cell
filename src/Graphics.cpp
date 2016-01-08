@@ -82,9 +82,9 @@ void Form::getXYZ(
     unsigned int &y,
     unsigned int &z)
 {
-  x = (pos % _dim[2]) % _dim[1];
-  y = (pos % _dim[2]) / _dim[1];
-  z = pos / (_dim[2]*_dim[1]);
+  x = (pos % (_dim[1]*_dim[0])) % _dim[1];
+  y = (pos % (_dim[1]*_dim[0])) / _dim[1];
+  z = pos / (_dim[1]*_dim[0]);
 }
 
 void Form::convertRectangleList()
@@ -95,6 +95,11 @@ void Form::convertRectangleList()
     if (pos != -1)
     {
       getXYZ(pos, x, y, z);
+      //std::cout << "pos : " << pos << std::endl;
+      //std::cout << x << std::endl;
+      //std::cout << y << std::endl;
+      //std::cout << z << std::endl;
+      //std::cout << "end" << std::endl;
       _cubesSource[i] = vtkCubeSource::New();
       _cubesSource[i]->SetCenter(x, y, z);
       _cubesSource[i]->SetXLength(0.8);
@@ -125,6 +130,8 @@ void Form::convertRectangleList()
 
 void Form::convert()
 {
+  //std::cout << _form.size() << std::endl;
+  //std::cout << std::accumulate(_dim.begin(), _dim.end(), 1, std::multiplies<int>()) << std::endl;
   assert(_form.size()==std::accumulate(_dim.begin(), _dim.end(), 1, std::multiplies<int>()));
   assert(_dim.size() == 2 || _dim.size() == 3);
   
@@ -160,18 +167,18 @@ Env::~Env ()
 {
 }
 
-void Env::addForm(const Form &myForm)
+void Env::addForm(Form *myForm)
 {
   _forms.push_back(myForm);
-  renderer->AddActor(myForm.getCubesActor());
-  renderer->AddActor(myForm.getPointsActor());
+  renderer->AddActor(myForm->getCubesActor());
+  renderer->AddActor(myForm->getPointsActor());
 }
 
 //void Env::updateForms()
 //{
   //renderer->Clear();
   //for (unsigned int i = 0; i < _forms.size(); ++i) {
-    //_forms[i].update();
+    //_forms[i].convert();
     //renderer->AddActor(_forms[i].getCubesActor());
     //renderer->AddActor(_forms[i].getPointsActor());
   //}

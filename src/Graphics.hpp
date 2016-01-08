@@ -67,7 +67,7 @@ public:
   Env (std::vector<double> bgColor);
   virtual ~Env ();
 
-  void addForm(const Form &myForm);
+  void addForm(Form *myForm);
 
   //void updateForms();
 
@@ -76,7 +76,7 @@ public:
 private:
   /* data */
   std::vector<double> _bgColor;
-  std::vector<Form> _forms;
+  std::vector<Form*> _forms;
 
   vtkSmartPointer<vtkRenderer> renderer;
   vtkSmartPointer<vtkRenderWindow> renderWindow;
