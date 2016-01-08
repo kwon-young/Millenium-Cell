@@ -10,6 +10,7 @@
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkCallbackCommand.h>
 #include <vtkStructuredGridGeometryFilter.h>
 #include <vtkCubeSource.h>
 #include <vtkAppendPolyData.h>
@@ -61,6 +62,12 @@ private:
   vtkSmartPointer<vtkActor> _cubesActor;
 };
 
+void KeypressCallbackFunction (
+  vtkObject* caller,
+  long unsigned int eventId,
+  void* clientData,
+  void* callData );
+
 class Env
 {
 public:
@@ -78,7 +85,8 @@ private:
   std::vector<double> _bgColor;
   std::vector<Form*> _forms;
 
-  vtkSmartPointer<vtkRenderer> renderer;
-  vtkSmartPointer<vtkRenderWindow> renderWindow;
-  vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor;
+  vtkSmartPointer<vtkRenderer> _renderer;
+  vtkSmartPointer<vtkRenderWindow> _renderWindow;
+  vtkSmartPointer<vtkRenderWindowInteractor> _renderWindowInteractor;
+  vtkSmartPointer<vtkCallbackCommand> _keypressCallback;
 };

@@ -151,16 +151,39 @@ vtkSmartPointer<vtkActor> Form::getCubesActor() const
   return _cubesActor;
 }
 
+void KeypressCallbackFunction (
+  vtkObject* caller,
+  long unsigned int vtkNotUsed(eventId),
+  void* vtkNotUsed(clientData),
+  void* vtkNotUsed(callData) )
+{
+ 
+  vtkRenderWindowInteractor *iren = 
+    static_cast<vtkRenderWindowInteractor*>(caller);
+  // Close the window
+  iren->GetRenderWindow()->Finalize();
+ 
+  // Stop the interactor
+  iren->TerminateApp();
+  std::cout << "Closing window..." << std::endl;
+}
+
 Env::Env (std::vector<double> bgColor):
   _bgColor(bgColor),
   _forms(),
-  renderer(vtkSmartPointer<vtkRenderer>::New()),
-  renderWindow(vtkSmartPointer<vtkRenderWindow>::New()),
-  renderWindowInteractor(vtkSmartPointer<vtkRenderWindowInteractor>::New())
+  _renderer(vtkSmartPointer<vtkRenderer>::New()),
+  _renderWindow(vtkSmartPointer<vtkRenderWindow>::New()),
+  _renderWindowInteractor(vtkSmartPointer<vtkRenderWindowInteractor>::New()),
+  _keypressCallback(vtkSmartPointer<vtkCallbackCommand>::New())
 {
-  renderWindow->AddRenderer(renderer);
-  renderWindowInteractor->SetRenderWindow(renderWindow);
-  renderer->SetBackground(_bgColor[0], _bgColor[1], _bgColor[2]);
+  _renderWindow->AddRenderer(_renderer);
+  _renderWindowInteractor->SetRenderWindow(_renderWindow);
+  _renderer->SetBackground(_bgColor[0], _bgColor[1], _bgColor[2]);
+
+  _keypressCallback->SetCallback ( KeypressCallbackFunction );
+  _renderWindowInteractor->AddObserver (
+    vtkCommand::KeyPressEvent,
+    _keypressCallback );
 }
 
 Env::~Env ()
@@ -170,8 +193,8 @@ Env::~Env ()
 void Env::addForm(Form *myForm)
 {
   _forms.push_back(myForm);
-  renderer->AddActor(myForm->getCubesActor());
-  renderer->AddActor(myForm->getPointsActor());
+  _renderer->AddActor(myForm->getCubesActor());
+  _renderer->AddActor(myForm->getPointsActor());
 }
 
 //void Env::updateForms()
@@ -186,6 +209,6 @@ void Env::addForm(Form *myForm)
 
 void Env::renderStart()
 {
-  renderWindow->Render();
-  renderWindowInteractor->Start();
+  _renderWindow->Render();
+  _renderWindowInteractor->Start();
 }
