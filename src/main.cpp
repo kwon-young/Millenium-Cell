@@ -35,7 +35,7 @@ int main()
 
   unsigned int firstPos = 55; // Specify the first cell's position
 
-  unsigned int maxCell = 7; // Defining the max cells to reach for final forms
+  unsigned int maxCell = 4; // Defining the max cells to reach for final forms
 
   // Dimensions of the grid
   unsigned int width = 10;
@@ -279,7 +279,7 @@ int main()
   // 2nd method
   // Output in an external file the list of nodes and that of edges
 
-  //  ofstream graphFile;
+    //ofstream graphFile;
   //
   //  graphFile.open("graphFile", ios::out);
   //    if (graphFile.bad()){ cerr << "Impossible d'ouvrir le fichier !" <<
@@ -287,55 +287,67 @@ int main()
   //
   //  boost::write_graphviz(graphFile,g);
 
-  // 3rd method
-  // Output all created form according to the graph structure
+   //3rd method
+   //Output all created form according to the graph structure
 
-  //  ofstream graphFile;
-  //  graphFile.open("graphFile", ios::out);
-  //  if (graphFile.bad()){ cerr << "Impossible d'ouvrir le fichier !" << endl;}
-  //
-  //  unsigned int t = 0;
-  //  vertexPair = vertices(g);
-  //  while(t <= timestep)
-  //  {
-  //      for(unsigned int step = 0; step < verticesPerTimestep[t]; step++)
-  //      {
-  //          graphFile<<g[*vertexPair.first]<<"     ";
-  //          ++vertexPair.first;
-  //      }
-  //      t++;
-  //      graphFile<<endl<<endl<<endl;
-  //  }
-
-  unsigned int cpt = 0, max;
-  max = std::accumulate(verticesPerTimestep.begin(), verticesPerTimestep.end(), 0);
-  while(cpt < max)
-  {
-    std::cout << cpt << std::endl;
-    boost::dynamic_bitset<> gform = g[*vertexPair_prev.first];
-    boost::dynamic_bitset<> form(10*10*2, 0);
-    for (int i = 0; i < 100; ++i) {
-      form[i] = gform[i];
-      //std::cout << form[i];
-      //if (!(i%10) && i!=0)
-        //std::cout << std::endl;
-    }
-    std::vector<unsigned int> dim(3);
-    dim[0] = 10;
-    dim[1] = 10;
-    dim[2] = 2;
-    Form myForm(form, dim);
-
-    std::vector<double> bgColor(3);
-    bgColor[0] = .2;
-    bgColor[1] = .3;
-    bgColor[2] = .4;
-    Env myEnv(bgColor);
-    myEnv.addForm(&myForm);
-    myEnv.renderStart();
-    ++vertexPair_prev.first;
-    cpt++;
-  }
+    ofstream graphFile;
+    graphFile.open("graphFile", ios::out);
+    if (graphFile.bad()){ cerr << "Impossible d'ouvrir le fichier !" << endl;}
   
+    unsigned int t = 0;
+    vertexPair = vertices(g);
+    while(t <= timestep)
+    {
+        for(unsigned int step = 0; step < verticesPerTimestep[t]; step++)
+        {
+            graphFile<<g[*vertexPair.first]<<"     ";
+            ++vertexPair.first;
+        }
+        t++;
+        graphFile<<endl<<endl<<endl;
+    }
+
+  //unsigned int cpt = 0, max;
+  //max = std::accumulate(verticesPerTimestep.begin(), verticesPerTimestep.end(), 0);
+  //while(cpt < max)
+  //{
+    //std::cout << cpt << std::endl;
+    //boost::dynamic_bitset<> gform = g[*vertexPair_prev.first];
+    //boost::dynamic_bitset<> form(10*10*2, 0);
+    //for (int i = 0; i < 100; ++i) {
+      //form[i] = gform[i];
+      ////std::cout << form[i];
+      ////if (!(i%10) && i!=0)
+        ////std::cout << std::endl;
+    //}
+    //std::vector<unsigned int> dim(3);
+    //dim[0] = 10;
+    //dim[1] = 10;
+    //dim[2] = 2;
+    //Form myForm(form, dim);
+
+    //std::vector<double> bgColor(3);
+    //bgColor[0] = .2;
+    //bgColor[1] = .3;
+    //bgColor[2] = .4;
+    //Env myEnv(bgColor, g);
+    //myEnv.addForm(&myForm);
+    //myEnv.renderStart();
+    //++vertexPair_prev.first;
+    //cpt++;
+  //}
+  
+  std::vector<unsigned int> dim(3);
+  dim[0] = 10;
+  dim[1] = 10;
+  dim[2] = 2;
+  std::vector<double> bgColor(3);
+  bgColor[0] = .2;
+  bgColor[1] = .3;
+  bgColor[2] = .4;
+  Env myEnv(bgColor, dim, g, verticesPerTimestep);
+  myEnv.Render();
+  myEnv.Start();
+
   return EXIT_SUCCESS;
 }

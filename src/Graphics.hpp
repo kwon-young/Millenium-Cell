@@ -23,21 +23,23 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include <vector>
+#include <string>
+
+#include "environment.h"
 
 class Form
 {
 public:
-  Form (const boost::dynamic_bitset<> &form, const std::vector<unsigned int> dim);
+  Form (boost::dynamic_bitset<> &form, std::vector<unsigned int> &dim);
   virtual ~Form ();
 
-  void convert();
   vtkSmartPointer<vtkActor> getPointsActor() const;
   vtkSmartPointer<vtkActor> getCubesActor() const;
 
+  void convertRectangleList();
 private:
 
   void convertPointGrid();
-  void convertRectangleList();
   void getXYZ(
       const unsigned int pos,
       unsigned int &x,
@@ -71,19 +73,30 @@ void KeypressCallbackFunction (
 class Env
 {
 public:
-  Env (std::vector<double> bgColor);
+  Env (
+      std::vector<double> bgColor,
+      std::vector<unsigned int> dim,
+      Graph &g,
+      std::vector<unsigned int> verticesPerTimestep);
   virtual ~Env ();
 
-  void addForm(Form *myForm);
+  //void addForm(Form *myForm);
 
-  //void updateForms();
+  void getFormFromGraph();
+  void updateForms(std::string keySym);
 
-  void renderStart();
+  void Render();
+  void Start();
 
 private:
   /* data */
   std::vector<double> _bgColor;
+  std::vector<unsigned int> _dim;
+  Graph &_g;
+  std::vector<unsigned int> _verticesPerTimestep;
+  pair< vertex_iter, vertex_iter > _vertexPair;
   std::vector<Form*> _forms;
+  unsigned int _renderIndex;
 
   vtkSmartPointer<vtkRenderer> _renderer;
   vtkSmartPointer<vtkRenderWindow> _renderWindow;
