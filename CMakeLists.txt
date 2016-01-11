@@ -12,6 +12,10 @@ include(${VTK_USE_FILE})
 
 add_executable(Millenium-Cell  src/Graphics.cpp src/environment.cpp src/main.cpp)
 
+#set(needed_features
+    #cxx_thread_local)
+  #target_compile_features(Millenium-Cell PRIVATE ${needed_features})
+
 IF(BOOST)
 FIND_PACKAGE(Boost REQUIRED)
 ENDIF(BOOST)

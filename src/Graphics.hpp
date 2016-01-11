@@ -27,41 +27,28 @@
 
 #include "environment.h"
 
+/*
+
 class Form
 {
 public:
   Form (boost::dynamic_bitset<> &form, std::vector<unsigned int> &dim);
   virtual ~Form ();
 
-  vtkSmartPointer<vtkActor> getPointsActor() const;
-  vtkSmartPointer<vtkActor> getCubesActor() const;
-
-  void convertRectangleList();
+  void setForm(vtkSmartPointer<vtkAppendPolyData> cubeAppendFilter);
 private:
 
-  void convertPointGrid();
   void getXYZ(
       const unsigned int pos,
       unsigned int &x,
       unsigned int &y,
       unsigned int &z);
 
-  /* data */
   boost::dynamic_bitset<> _form;
   std::vector<unsigned int> _dim;
 
-  vtkSmartPointer<vtkStructuredGrid> _pointsStructuredGrid;
-  vtkSmartPointer<vtkPoints> _points;
-  vtkSmartPointer<vtkStructuredGridGeometryFilter> _pointsGeometryFilter;
-  vtkSmartPointer<vtkPolyDataMapper> _pointsMapper;
-  vtkSmartPointer<vtkActor> _pointsActor;
-
   vtkPolyData **_inputs;
   vtkCubeSource **_cubesSource;
-  vtkSmartPointer<vtkAppendPolyData> _cubesAppendFilter;
-  vtkSmartPointer<vtkCleanPolyData> _cubesCleanFilter;
-  vtkSmartPointer<vtkPolyDataMapper> _cubesMapper;
-  vtkSmartPointer<vtkActor> _cubesActor;
 };
 
 void KeypressCallbackFunction (
@@ -89,7 +76,9 @@ public:
   void Start();
 
 private:
-  /* data */
+
+  void convertPointGrid();
+
   std::vector<double> _bgColor;
   std::vector<unsigned int> _dim;
   Graph &_g;
@@ -98,8 +87,78 @@ private:
   std::vector<Form*> _forms;
   unsigned int _renderIndex;
 
+  vtkSmartPointer<vtkStructuredGrid> _pointsStructuredGrid;
+  vtkSmartPointer<vtkPoints> _points;
+  vtkSmartPointer<vtkStructuredGridGeometryFilter> _pointsGeometryFilter;
+  vtkSmartPointer<vtkPolyDataMapper> _pointsMapper;
+  vtkSmartPointer<vtkActor> _pointsActor;
+
+  vtkSmartPointer<vtkAppendPolyData> _cubesAppendFilter;
+  vtkSmartPointer<vtkCleanPolyData> _cubesCleanFilter;
+  vtkSmartPointer<vtkPolyDataMapper> _cubesMapper;
+  vtkSmartPointer<vtkActor> _cubesActor;
+
   vtkSmartPointer<vtkRenderer> _renderer;
   vtkSmartPointer<vtkRenderWindow> _renderWindow;
   vtkSmartPointer<vtkRenderWindowInteractor> _renderWindowInteractor;
   vtkSmartPointer<vtkCallbackCommand> _keypressCallback;
+};
+
+*/
+
+class GraphViewer
+{
+public:
+  GraphViewer (
+      Graph &g,
+      std::vector<int> verticesPerTimestep,
+      std::vector<double> bgColor,
+      std::vector<int> dim);
+  virtual ~GraphViewer ();
+
+  int getFormIndex() const;
+  void setFormIndex(int newFormIndex);
+
+  void Render();
+  void Start();
+private:
+
+  void convertPointGrid();
+  void initCubes();
+  void getXYZ(
+      const int pos,
+      int &x,
+      int &y,
+      int &z);
+  void resizeCubes(int size);
+  void drawForm();
+  void updateCubes();
+
+  /* data */
+  Graph &_g;
+  std::vector<int> _verticesPerTimestep;
+  std::vector<double> _bgColor;
+  std::vector<int> _dim;
+
+  vtkSmartPointer<vtkRenderer> _renderer;
+  vtkSmartPointer<vtkRenderWindow> _renderWindow;
+  vtkSmartPointer<vtkRenderWindowInteractor> _renderWindowInteractor;
+  vtkSmartPointer<vtkCallbackCommand> _keypressCallback;
+
+  vtkSmartPointer<vtkStructuredGrid> _pointsStructuredGrid;
+  vtkSmartPointer<vtkPoints> _points;
+  vtkSmartPointer<vtkStructuredGridGeometryFilter> _pointsGeometryFilter;
+  vtkSmartPointer<vtkPolyDataMapper> _pointsMapper;
+  vtkSmartPointer<vtkActor> _pointsActor;
+
+  std::vector<vtkCubeSource*> _cubesSource;
+  std::vector<vtkPolyData*> _inputs;
+  vtkSmartPointer<vtkAppendPolyData> _cubesAppendFilter;
+  vtkSmartPointer<vtkCleanPolyData> _cubesCleanFilter;
+  vtkSmartPointer<vtkPolyDataMapper> _cubesMapper;
+  vtkSmartPointer<vtkActor> _cubesActor;
+
+  int _formIndex;
+  boost::dynamic_bitset<> _form;
+  pair< vertex_iter, vertex_iter > _vertexPair;
 };

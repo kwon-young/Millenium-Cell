@@ -337,7 +337,7 @@ int main()
     //cpt++;
   //}
   
-  std::vector<unsigned int> dim(3);
+  std::vector<int> dim(3);
   dim[0] = 10;
   dim[1] = 10;
   dim[2] = 2;
@@ -345,9 +345,16 @@ int main()
   bgColor[0] = .2;
   bgColor[1] = .3;
   bgColor[2] = .4;
-  Env myEnv(bgColor, dim, g, verticesPerTimestep);
-  myEnv.Render();
-  myEnv.Start();
+  //Env myEnv(bgColor, dim, g, verticesPerTimestep);
+  //myEnv.Render();
+  //myEnv.Start();
+  std::vector<int> myvertices(verticesPerTimestep.size());
+  for (int i = 0; i < myvertices.size(); ++i) {
+    myvertices[i] = verticesPerTimestep[i];
+  }
+  GraphViewer gv = GraphViewer(g, myvertices, bgColor, dim);
+  gv.Render();
+  gv.Start();
 
   return EXIT_SUCCESS;
 }
