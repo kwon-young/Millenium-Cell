@@ -27,6 +27,13 @@ struct graphEdge {
   unsigned int
       Mitoser; // the index which identify the mother cell that triggers mitose
   int Temps;   // the timestep
+  template <typename Archive>
+  void serialize(Archive& ar, const unsigned int version)
+  {
+    ar & Control;
+    ar & Mitoser;
+    ar & Temps;
+  }
 };
 
 // Definition of the graph

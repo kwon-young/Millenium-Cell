@@ -3,7 +3,13 @@
 /// \author A. Sarr
 /// \version 1.0
 /// \date 24 mai 2013
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/serialization/bitset.hpp>
+#include <boost/graph/adj_list_serialize.hpp>
+#include <boost/serialization/vector.hpp>
 
+#include <fstream>
 #include <iostream>
 #include <vector>
 #include <numeric>
@@ -12,6 +18,43 @@
 #include "environment.h"
 #include "Graphics.hpp"
 
+struct A {
+    boost::dynamic_bitset<> x;
+  private:
+    friend class boost::serialization::access;
+    template <class Archive> void serialize(Archive &ar, const unsigned int) { 
+        ar &x; 
+    }
+};
+
+namespace boost { namespace serialization {
+
+    template <typename Ar, typename Block, typename Alloc>
+        void save(Ar& ar, dynamic_bitset<Block, Alloc> const& bs, unsigned) {
+            size_t num_bits = bs.size();
+            std::vector<Block> blocks(bs.num_blocks());
+            to_block_range(bs, blocks.begin());
+
+            ar & num_bits & blocks;
+        }
+
+    template <typename Ar, typename Block, typename Alloc>
+        void load(Ar& ar, dynamic_bitset<Block, Alloc>& bs, unsigned) {
+            size_t num_bits;
+            std::vector<Block> blocks;
+            ar & num_bits & blocks;
+
+            bs.resize(num_bits);
+            from_block_range(blocks.begin(), blocks.end(), bs);
+            bs.resize(num_bits);
+        }
+
+    template <typename Ar, typename Block, typename Alloc>
+        void serialize(Ar& ar, dynamic_bitset<Block, Alloc>& bs, unsigned version) {
+            split_free(ar, bs, version);
+        }
+
+} }
 
 int main()
 {
@@ -337,6 +380,20 @@ int main()
     //cpt++;
   //}
   
+  const char* fileName = "saved.txt"; 
+  {
+    // Create an output archive
+    std::ofstream ofs(fileName);
+    boost::archive::text_oarchive ar(ofs);
+
+    // Write data
+    ar & g;
+  }
+  std::ifstream ifs(fileName);
+  boost::archive::text_iarchive ia(ifs);
+  Graph g2;
+  ia >> g2;
+
   std::vector<int> dim(3);
   dim[0] = 10;
   dim[1] = 10;
@@ -352,7 +409,7 @@ int main()
   for (int i = 0; i < myvertices.size(); ++i) {
     myvertices[i] = verticesPerTimestep[i];
   }
-  GraphViewer gv = GraphViewer(g, myvertices, bgColor, dim);
+  GraphViewer gv = GraphViewer(g2, myvertices, bgColor, dim);
   gv.Render();
   gv.Start();
 
