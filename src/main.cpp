@@ -3,12 +3,58 @@
 /// \author A. Sarr
 /// \version 1.0
 /// \date 24 mai 2013
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/serialization/bitset.hpp>
+#include <boost/graph/adj_list_serialize.hpp>
+#include <boost/serialization/vector.hpp>
 
+#include <fstream>
 #include <iostream>
+#include <vector>
+#include <numeric>
 
 //#include <C:/Users/info/Desktop/Viab-Cell/environment.h>
 #include "environment.h"
-#include "Cell.hpp"
+#include "Graphics.hpp"
+
+struct A {
+    boost::dynamic_bitset<> x;
+  private:
+    friend class boost::serialization::access;
+    template <class Archive> void serialize(Archive &ar, const unsigned int) { 
+        ar &x; 
+    }
+};
+
+namespace boost { namespace serialization {
+
+    template <typename Ar, typename Block, typename Alloc>
+        void save(Ar& ar, dynamic_bitset<Block, Alloc> const& bs, unsigned) {
+            size_t num_bits = bs.size();
+            std::vector<Block> blocks(bs.num_blocks());
+            to_block_range(bs, blocks.begin());
+
+            ar & num_bits & blocks;
+        }
+
+    template <typename Ar, typename Block, typename Alloc>
+        void load(Ar& ar, dynamic_bitset<Block, Alloc>& bs, unsigned) {
+            size_t num_bits;
+            std::vector<Block> blocks;
+            ar & num_bits & blocks;
+
+            bs.resize(num_bits);
+            from_block_range(blocks.begin(), blocks.end(), bs);
+            bs.resize(num_bits);
+        }
+
+    template <typename Ar, typename Block, typename Alloc>
+        void serialize(Ar& ar, dynamic_bitset<Block, Alloc>& bs, unsigned version) {
+            split_free(ar, bs, version);
+        }
+
+} }
 
 int main()
 {
@@ -32,7 +78,7 @@ int main()
 
   unsigned int firstPos = 55; // Specify the first cell's position
 
-  unsigned int maxCell = 6; // Defining the max cells to reach for final forms
+  unsigned int maxCell = 4; // Defining the max cells to reach for final forms
 
   // Dimensions of the grid
   unsigned int width = 10;
@@ -105,6 +151,7 @@ int main()
   boost::dynamic_bitset<> formContainer(maxSize, 0); // The starting form
 
   formContainer.set(firstPos); // set position
+
 
   timestep = 0;
 
@@ -286,22 +333,85 @@ int main()
   // 3rd method
   // Output all created form according to the graph structure
 
-  //  ofstream graphFile;
-  //  graphFile.open("graphFile", ios::out);
-  //  if (graphFile.bad()){ cerr << "Impossible d'ouvrir le fichier !" << endl;}
-  //
-  //  unsigned int t = 0;
-  //  vertexPair = vertices(g);
-  //  while(t <= timestep)
-  //  {
-  //      for(unsigned int step = 0; step < verticesPerTimestep[t]; step++)
-  //      {
-  //          graphFile<<g[*vertexPair.first]<<"     ";
-  //          ++vertexPair.first;
-  //      }
-  //      t++;
-  //      graphFile<<endl<<endl<<endl;
-  //  }
+    ofstream graphFile;
+    graphFile.open("graphFile", ios::out);
+    if (graphFile.bad()){ cerr << "Impossible d'ouvrir le fichier !" << endl;}
+  
+    unsigned int t = 0;
+    vertexPair = vertices(g);
+    while(t <= timestep)
+    {
+        for(unsigned int step = 0; step < verticesPerTimestep[t]; step++)
+        {
+            graphFile<<g[*vertexPair.first]<<"     ";
+            ++vertexPair.first;
+        }
+        t++;
+        graphFile<<endl<<endl<<endl;
+    }
 
-  return 0;
+  //unsigned int cpt = 0, max;
+  //max = std::accumulate(verticesPerTimestep.begin(), verticesPerTimestep.end(), 0);
+  //while(cpt < max)
+  //{
+    //std::cout << cpt << std::endl;
+    //boost::dynamic_bitset<> gform = g[*vertexPair_prev.first];
+    //boost::dynamic_bitset<> form(10*10*2, 0);
+    //for (int i = 0; i < 100; ++i) {
+      //form[i] = gform[i];
+      ////std::cout << form[i];
+      ////if (!(i%10) && i!=0)
+        ////std::cout << std::endl;
+    //}
+    //std::vector<unsigned int> dim(3);
+    //dim[0] = 10;
+    //dim[1] = 10;
+    //dim[2] = 2;
+    //Form myForm(form, dim);
+
+    //std::vector<double> bgColor(3);
+    //bgColor[0] = .2;
+    //bgColor[1] = .3;
+    //bgColor[2] = .4;
+    //Env myEnv(bgColor, g);
+    //myEnv.addForm(&myForm);
+    //myEnv.renderStart();
+    //++vertexPair_prev.first;
+    //cpt++;
+  //}
+  
+  const char* fileName = "saved.txt"; 
+  {
+    // Create an output archive
+    std::ofstream ofs(fileName);
+    boost::archive::text_oarchive ar(ofs);
+
+    // Write data
+    ar & g;
+  }
+  std::ifstream ifs(fileName);
+  boost::archive::text_iarchive ia(ifs);
+  Graph g2;
+  ia >> g2;
+
+  std::vector<int> dim(3);
+  dim[0] = 10;
+  dim[1] = 10;
+  dim[2] = 2;
+  std::vector<double> bgColor(3);
+  bgColor[0] = .2;
+  bgColor[1] = .3;
+  bgColor[2] = .4;
+  //Env myEnv(bgColor, dim, g, verticesPerTimestep);
+  //myEnv.Render();
+  //myEnv.Start();
+  std::vector<int> myvertices(verticesPerTimestep.size());
+  for (int i = 0; i < myvertices.size(); ++i) {
+    myvertices[i] = verticesPerTimestep[i];
+  }
+  GraphViewer gv = GraphViewer(g2, myvertices, bgColor, dim);
+  gv.Render();
+  gv.Start();
+
+  return EXIT_SUCCESS;
 }
