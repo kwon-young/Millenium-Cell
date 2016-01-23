@@ -381,14 +381,16 @@ int main()
   //}
   
   const char* fileName = "saved.txt"; 
-  {
-    // Create an output archive
-    std::ofstream ofs(fileName);
-    boost::archive::text_oarchive ar(ofs);
+  // Create an output archive
+  std::ofstream ofs(fileName);
+  boost::archive::text_oarchive ar(ofs);
 
-    // Write data
-    ar & g;
-  }
+  // Write data
+  ar & g;
+  ar & verticesPerTimestep;
+  ar & height;
+  ar & width;
+
   std::ifstream ifs(fileName);
   boost::archive::text_iarchive ia(ifs);
   Graph g2;
