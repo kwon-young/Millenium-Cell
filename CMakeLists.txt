@@ -17,7 +17,7 @@ endif()
 find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})
 
-add_executable(Millenium-Cell src/main.cpp src/Graphics.cpp src/environment.cpp )
+add_executable(Millenium-Cell src/GraphManager.cpp src/main.cpp src/Graphics.cpp src/environment.cpp )
 
 if(VTK_LIBRARIES)
   target_link_libraries(Millenium-Cell ${VTK_LIBRARIES})
@@ -36,3 +36,8 @@ add_custom_target(tags
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
   add_dependencies(Millenium-Cell tags)
 
+add_custom_target(run
+  COMMAND Millenium-Cell
+  DEPENDS Millenium-Cell
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+)
