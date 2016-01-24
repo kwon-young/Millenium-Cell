@@ -72,12 +72,13 @@ GraphViewer::GraphViewer (
   _pointsGeometryFilter(vtkSmartPointer<vtkStructuredGridGeometryFilter>::New()),
   _pointsMapper(vtkSmartPointer<vtkPolyDataMapper>::New()),
   _pointsActor(vtkSmartPointer<vtkActor>::New()),
-  _cubesSource(),
-  _inputs(),
-  _cubesAppendFilter(vtkSmartPointer<vtkAppendPolyData>::New()),
-  _cubesCleanFilter(vtkSmartPointer<vtkCleanPolyData>::New()),
-  _cubesMapper(vtkSmartPointer<vtkPolyDataMapper>::New()),
-  _cubesActor(vtkSmartPointer<vtkActor>::New()),
+  _cubePoints(vtkSmartPointer<vtkPoints>::New()),
+  _cubeColors(vtkSmartPointer<vtkUnsignedCharArray>::New()),
+  _cubePolyData(vtkSmartPointer<vtkPolyData>::New()),
+  _cubeSource(vtkSmartPointer<vtkCubeSource>::New()),
+  _cubeGlyph3D(vtkSmartPointer<vtkGlyph3D>::New()),
+  _cubeMapper(vtkSmartPointer<vtkPolyDataMapper>::New()),
+  _cubeActor(vtkSmartPointer<vtkActor>::New()),
   _formIndex(0),
   _form(),
   _vertexPair(vertices(_g))
@@ -152,10 +153,20 @@ void GraphViewer::convertPointGrid()
 
 void GraphViewer::initCubes()
 {
-  _cubesCleanFilter->SetInputConnection(_cubesAppendFilter->GetOutputPort());
-  _cubesMapper->SetInputConnection(_cubesCleanFilter->GetOutputPort());
-  _cubesActor->SetMapper(_cubesMapper);
-  _renderer->AddActor(_cubesActor);
+  _cubeColors->SetName("colors");
+  _cubePolyData->SetPoints(_cubePoints);
+  _cubePolyData->GetPointData()->SetScalars(_cubeColors);
+  _cubeGlyph3D->SetColorModeToColorByScalar();
+  _cubeGlyph3D->SetSourceConnection(_cubeSource->GetOutputPort());
+#if VTK_MAJOR_VERSION <= 5
+  _cubeGlyph3D->SetInput(_cubePolyData);
+#else
+  _cubeGlyph3D->SetInputData(_cubePolyData);
+#endif
+  _cubeGlyph3D->ScalingOff();
+  _cubeMapper->SetInputConnection(_cubeGlyph3D->GetOutputPort());
+  _cubeActor->SetMapper(_cubeMapper);
+  _renderer->AddActor(_cubeActor);
 }
 
 int GraphViewer::getFormIndex() const
@@ -187,33 +198,9 @@ void GraphViewer::setFormIndex(int newFormIndex)
 
 void GraphViewer::resizeCubes(int size)
 {
-  if (size > _cubesSource.size())
-  {
-    // Add cubes
-    int diff = size-_cubesSource.size();
-    for (int i = 0; i < diff; ++i) {
-      _cubesSource.push_back(vtkCubeSource::New());
-      _inputs.push_back(vtkPolyData::New());
-#if VTK_MAJOR_VERSION <= 5
-      _cubesAppendFilter->AddInputConnection((*(_inputs.end()))->GetProducerPort());
-#else
-      _cubesAppendFilter->AddInputData(_inputs[_inputs.size()-1]);
-#endif
-    }
-  } else if (size < _cubesSource.size())
-  {
-    // Remove cubes
-    int diff = (size-_cubesSource.size());
-    diff = std::abs(diff);
-    for (int i = 0; i < diff; ++i) {
-      if (_inputs.size() > 1)
-      {
-        _cubesAppendFilter->RemoveInputData(_inputs[_inputs.size()-1]);
-        _inputs.pop_back();
-        _cubesSource.pop_back();
-      }
-    }
-  }
+  _cubePoints->SetNumberOfPoints(size);
+  _cubeColors->SetNumberOfComponents(size);
+  _cubeColors->SetNumberOfTuples(size);
 }
 
 void GraphViewer::getXYZ(
@@ -230,7 +217,7 @@ void GraphViewer::getXYZ(
 void GraphViewer::drawForm()
 {
   // Check the number of cubes, resize if different
-  if (_form.count() != _cubesSource.size())
+  if (_form.count() != _cubePoints->GetNumberOfPoints())
   {
     resizeCubes(_form.count());
   }
@@ -238,44 +225,25 @@ void GraphViewer::drawForm()
   int pos = _form.find_first();
   int x, y, z;
 
-  // Setup scales. This can also be an Int array
-  // char is used since it takes the least memory
-  vtkSmartPointer<vtkUnsignedCharArray> colors = 
-    vtkSmartPointer<vtkUnsignedCharArray>::New();
-  colors->SetName("colors");
-  colors->SetNumberOfComponents(3);
-  unsigned char r[3] = {255,0,0};
-  unsigned char g[3] = {0,255,0};
-  unsigned char b[3] = {0,0,255};
-  colors->InsertNextTupleValue(r);
-  colors->InsertNextTupleValue(g);
-  colors->InsertNextTupleValue(b);
-
-  for (unsigned int i = 0; i < _cubesSource.size(); ++i) {
+  for (vtkIdType i = 0; i < _cubePoints->GetNumberOfPoints(); ++i) {
+    //std::cout << "find 1 at " << pos << std::endl;
     if (pos != -1)
     {
+      unsigned char color[3] = {255, 0, 0};
       getXYZ(pos, x, y, z);
       //std::cout << "pos : " << pos << std::endl;
       //std::cout << x << std::endl;
       //std::cout << y << std::endl;
       //std::cout << z << std::endl;
       //std::cout << "end" << std::endl;
-      _cubesSource[i]->SetCenter(x, y, z);
-      _cubesSource[i]->SetXLength(0.8);
-      _cubesSource[i]->SetYLength(0.8);
-      _cubesSource[i]->SetZLength(0.8);
-      _cubesSource[i]->Update();
-      _inputs[i]->ShallowCopy(_cubesSource[i]->GetOutput());
-#if VTK_MAJOR_VERSION <= 5
-      _cubesAppendFilter->AddInputConnection(_inputs[i]->GetProducerPort());
-#else
-      _cubesAppendFilter->AddInputData(_inputs[i]);
-#endif
+      _cubePoints->SetPoint(i, x, y, z);
+      _cubeColors->SetTupleValue(i, color);
     }
     pos = _form.find_next(pos);
   }
-  _cubesAppendFilter->Update();
-  _cubesCleanFilter->Update();
+  _cubeGlyph3D->Update();
   _renderWindow->Render();
+  //std::cout << _cubePoints->GetNumberOfPoints() << std::endl;
+  //std::cout << _cubeColors->GetNumberOfPoints() << std::endl;
 
 }

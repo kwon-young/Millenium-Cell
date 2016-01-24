@@ -22,12 +22,11 @@
 #include <vtkCallbackCommand.h>
 #include <vtkStructuredGridGeometryFilter.h>
 #include <vtkCubeSource.h>
-#include <vtkAppendPolyData.h>
-#include <vtkCleanPolyData.h>
 #include <vtkPolyData.h>
-#include <vtkSphereSource.h>
-#include <vtkConeSource.h>
 #include <vtkPoints.h>
+#include <vtkUnsignedCharArray.h>
+#include <vtkGlyph3D.h>
+#include <vtkPointData.h>
 
 /**
  * Boost include
@@ -175,12 +174,13 @@ private:
    * VTK objects for drawing multiple cubes
    * Used for drawing a form in the vtk windows
    */
-  std::vector<vtkCubeSource*> _cubesSource;
-  std::vector<vtkPolyData*> _inputs;
-  vtkSmartPointer<vtkAppendPolyData> _cubesAppendFilter;
-  vtkSmartPointer<vtkCleanPolyData> _cubesCleanFilter;
-  vtkSmartPointer<vtkPolyDataMapper> _cubesMapper;
-  vtkSmartPointer<vtkActor> _cubesActor;
+  vtkSmartPointer<vtkPoints> _cubePoints;
+  vtkSmartPointer<vtkUnsignedCharArray> _cubeColors;
+  vtkSmartPointer<vtkPolyData> _cubePolyData;
+  vtkSmartPointer<vtkCubeSource> _cubeSource;
+  vtkSmartPointer<vtkGlyph3D> _cubeGlyph3D;
+  vtkSmartPointer<vtkPolyDataMapper> _cubeMapper;
+  vtkSmartPointer<vtkActor> _cubeActor;
 
   int _formIndex; /*!< index of the current form*/
   boost::dynamic_bitset<> _form; /*!< dynamic_bytset of the current form*/
