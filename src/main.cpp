@@ -17,6 +17,7 @@
 //#include <C:/Users/info/Desktop/Viab-Cell/environment.h>
 #include "environment.h"
 #include "Graphics.hpp"
+#include "GraphManager.hpp"
 
 struct A {
     boost::dynamic_bitset<> x;
@@ -380,7 +381,9 @@ int main()
     //cpt++;
   //}
   
+
   const char* fileName = "saved.txt"; 
+  {
   // Create an output archive
   std::ofstream ofs(fileName);
   boost::archive::text_oarchive ar(ofs);
@@ -390,7 +393,7 @@ int main()
   ar & verticesPerTimestep;
   ar & height;
   ar & width;
-
+  }
   std::ifstream ifs(fileName);
   boost::archive::text_iarchive ia(ifs);
   Graph g2;
@@ -399,7 +402,7 @@ int main()
   std::vector<int> dim(3);
   dim[0] = 10;
   dim[1] = 10;
-  dim[2] = 2;
+  dim[2] = 1;
   std::vector<double> bgColor(3);
   bgColor[0] = .2;
   bgColor[1] = .3;
@@ -411,6 +414,8 @@ int main()
   for (int i = 0; i < myvertices.size(); ++i) {
     myvertices[i] = verticesPerTimestep[i];
   }
+
+  GraphManager gm(dim, 10, 10, 10, 0);
   GraphViewer gv = GraphViewer(g2, myvertices, bgColor, dim);
   gv.Render();
   gv.Start();

@@ -116,6 +116,9 @@ void GraphViewer::Start()
 
 void GraphViewer::convertPointGrid()
 {
+  if (_dim[2] == 1) _dim[2]++;
+
+
   // Iterate through all dimension to set point
   for(int k = 0; k < _dim[2]; k++)
   {
@@ -234,6 +237,20 @@ void GraphViewer::drawForm()
   // pos is used for the index of the current cube
   int pos = _form.find_first();
   int x, y, z;
+
+  // Setup scales. This can also be an Int array
+  // char is used since it takes the least memory
+  vtkSmartPointer<vtkUnsignedCharArray> colors = 
+    vtkSmartPointer<vtkUnsignedCharArray>::New();
+  colors->SetName("colors");
+  colors->SetNumberOfComponents(3);
+  unsigned char r[3] = {255,0,0};
+  unsigned char g[3] = {0,255,0};
+  unsigned char b[3] = {0,0,255};
+  colors->InsertNextTupleValue(r);
+  colors->InsertNextTupleValue(g);
+  colors->InsertNextTupleValue(b);
+
   for (unsigned int i = 0; i < _cubesSource.size(); ++i) {
     if (pos != -1)
     {
