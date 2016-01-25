@@ -54,6 +54,8 @@ public:
       int pos);
   bool canMitose(
       int pos,
+      char dir,
+      std::vector<int> dim,
       std::vector<double> &energy,
       std::vector<double> &lactate,
       bool healthy);

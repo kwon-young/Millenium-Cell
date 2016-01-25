@@ -79,11 +79,29 @@ void GraphManager::cancerous_reaction(
 
 bool GraphManager::canMitose(
     int pos,
+    char dir,
+    std::vector<int> dim,
     std::vector<double> &energy,
     std::vector<double> &lactate,
     bool healthy)
 {
   double lacMitose;
+  int poseMitose = pos;
+  switch (dir) {
+    case 'd': {
+       poseMitose -= dim[0];
+    } break;
+
+    case 'u': {
+        poseMitose += dim[0];
+    } break;
+    case 'l': {
+        poseMitose += 1;
+    } break;
+    case 'r': {
+        poseMitose -= 1;
+    } break;
+  }
   if (healthy)
   {
     lacMitose = _hLacMitose;
@@ -93,6 +111,7 @@ bool GraphManager::canMitose(
   if (energy[pos] > _eneMitose && lactate[pos] < lacMitose)
   {
     energy[pos] -= _eneMitose;
+    energy[poseMitose] += _eneMitose;
     return true;
   } else {
     return false;

@@ -292,6 +292,8 @@ int main()
             if(mitose) {
               mitose = gm.canMitose(
                   motherPosition,
+                  directions[d],
+                  dim,
                   mitoEnergy,
                   mitoLactate,
                   healthy);
