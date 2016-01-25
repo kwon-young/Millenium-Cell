@@ -15,6 +15,11 @@ typedef boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS,
 typedef boost::graph_traits< VectorGraph >::vertex_iterator vectorVertex_iter;
 typedef VectorGraph::vertex_descriptor VectorVertex;
 
+/* -----------------------------------------------------------*/
+/** 
+ * @brief GraphManager class
+ */
+/* -----------------------------------------------------------*/
 class GraphManager
 {
 public:
