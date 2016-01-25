@@ -70,6 +70,11 @@ int main()
   std::map<unsigned int, std::vector<unsigned int> > verticesPerNbCell;
 
   Graph g;               // defining a graph
+  std::vector<int> dim(3);
+  dim[0] = 10;
+  dim[1] = 10;
+  dim[2] = 1;
+  GraphManager gm(dim, g, 0, 100, 100, 0);
   unsigned int timestep; // Records the timesteps
 
   //  unsigned int bridgeTime4 = 3; //Defining the time of crossing constraints
@@ -160,11 +165,13 @@ int main()
   pair< vertex_iter, vertex_iter > vertexPair, vertexPair_prev;
 
   // Add the starting form to the graph ! This form will represent the root
-  boost::add_vertex(formContainer, g);
+  //boost::add_vertex(formContainer, g);
+  
+  std::vector<double> energy(maxSize, 0), oxygen(maxSize, 100), glucose(maxSize, 100), lactate(maxSize, 0);
+  gm.add_vertexToGForm(formContainer, energy, oxygen, glucose, lactate);
 
   // Record the reference of the vertex among those of the same number of cell
-  verticesPerNbCell[formContainer.count()].push_back(boost::num_vertices(g) -
-                                                     1);
+  verticesPerNbCell[formContainer.count()].push_back(gm.getMaxNbrOfForm() - 1);
 
   // At initial time 0 we have just one node corresponding to the root
   verticesPerTimestep.push_back(1);
@@ -174,7 +181,7 @@ int main()
     // Initialize the number of vertices in the current timestep
     countVerticesPerTime = 0;
 
-    vertexPair_prev = vertices(g);
+    vertexPair_prev = vertices(gm.getGForm());
 
     timestep++;
 
@@ -186,7 +193,7 @@ int main()
       --vertexPair_prev.second;
 
       // Form in the current node to be processed
-      boost::dynamic_bitset<> form = g[*vertexPair_prev.second];
+      boost::dynamic_bitset<> form = gm.getGForm()[*vertexPair_prev.second];
 
       unsigned int nbCells = form.count();
       unsigned int formSize = 0;
@@ -242,21 +249,23 @@ int main()
               // generated form,
               // test if there is any redundance, also with geometrical
               // transformation
-              if (verticesPerNbCell[newNbCells].size() != 0)
-                vertex = env->existInGraph(g, mitoForm,
-                                           verticesPerNbCell[newNbCells]);
-              else
-                vertex = 0;
+              //if (verticesPerNbCell[newNbCells].size() != 0)
+                //vertex = env->existInGraph(g, mitoForm,
+                                           //verticesPerNbCell[newNbCells]);
+              //else
+                //vertex = 0;
+              // do not check if form already exist
+              vertex = 0;
 
               // If there is no redundance
               if (vertex == 0) {
                 // Add the wewly created form in the graph
-                Vertex formVertex = boost::add_vertex(mitoForm, g);
+                //Vertex formVertex = boost::add_vertex(mitoForm, g);
+                Vertex formVertex = gm.add_vertexToGForm(mitoForm, energy, oxygen, glucose, lactate);
 
                 // In the map, record the reference of the vertex among those of
                 // the same number of cell
-                verticesPerNbCell[newNbCells].push_back(boost::num_vertices(g) -
-                                                        1);
+                verticesPerNbCell[newNbCells].push_back(gm.getMaxNbrOfForm() - 1);
 
                 // Define an edge that link the two vertices and add properties
                 graphEdge firstEdge;
@@ -266,7 +275,8 @@ int main()
                 firstEdge.Temps = timestep;
 
                 // link the two vertices
-                add_edge(*vertexPair_prev.second, formVertex, firstEdge, g);
+                //add_edge(*vertexPair_prev.second, formVertex, firstEdge, g);
+                gm.add_edgeToGForm(*vertexPair_prev.second, formVertex, firstEdge);
 
                 // Increment the number of added vertices in the current
                 // timestep
@@ -284,7 +294,8 @@ int main()
                 anotherEdge.Mitoser = motherPosition;
                 anotherEdge.Temps = timestep;
 
-                add_edge(*vertexPair_prev.second, vertex, anotherEdge, g);
+                //add_edge(*vertexPair_prev.second, vertex, anotherEdge, g);
+                gm.add_edgeToGForm(*vertexPair_prev.second, vertex, anotherEdge);
               }
             }
           }
@@ -305,11 +316,11 @@ int main()
   cout << "* NUMBER = " << verticesPerTimestep[timestep] << endl;
   cout << "* TIMESTEP = " << timestep - 1 << endl;
 
-  vertexPair_prev = vertices(g);
+  vertexPair_prev = vertices(gm.getGForm());
 
   //  Displaying results on an external file
   for (unsigned int last = 0; last < verticesPerTimestep[timestep]; last++)
-    env->display(g[*--vertexPair_prev.second], last + 1);
+    env->display(gm.getGForm()[*--vertexPair_prev.second], last + 1);
 
   // free allocated memories
   delete env;
@@ -339,12 +350,12 @@ int main()
     if (graphFile.bad()){ cerr << "Impossible d'ouvrir le fichier !" << endl;}
   
     unsigned int t = 0;
-    vertexPair = vertices(g);
+    vertexPair = vertices(gm.getGForm());
     while(t <= timestep)
     {
         for(unsigned int step = 0; step < verticesPerTimestep[t]; step++)
         {
-            graphFile<<g[*vertexPair.first]<<"     ";
+            graphFile<<gm.getGForm()[*vertexPair.first]<<"     ";
             ++vertexPair.first;
         }
         t++;
@@ -382,27 +393,28 @@ int main()
   //}
   
 
-  const char* fileName = "saved.txt"; 
-  {
-  // Create an output archive
-  std::ofstream ofs(fileName);
-  boost::archive::text_oarchive ar(ofs);
+  //const char* fileName = "saved.txt"; 
+  //{
+  //// Create an output archive
+  //std::ofstream ofs(fileName);
+  //boost::archive::text_oarchive ar(ofs);
 
-  // Write data
-  ar & g;
-  ar & verticesPerTimestep;
-  ar & height;
-  ar & width;
+  //// Write data
+  //ar & g;
+  //ar & verticesPerTimestep;
+  //ar & height;
+  //ar & width;
+  //}
+  //std::ifstream ifs(fileName);
+  //boost::archive::text_iarchive ia(ifs);
+  //Graph g2;
+  //ia >> g2;
+
+  std::vector<int> myvertices(verticesPerTimestep.size());
+  for (int i = 0; i < myvertices.size(); ++i) {
+    myvertices[i] = verticesPerTimestep[i];
   }
-  std::ifstream ifs(fileName);
-  boost::archive::text_iarchive ia(ifs);
-  Graph g2;
-  ia >> g2;
 
-  std::vector<int> dim(3);
-  dim[0] = 10;
-  dim[1] = 10;
-  dim[2] = 1;
   std::vector<double> bgColor(3);
   bgColor[0] = .2;
   bgColor[1] = .3;
@@ -410,13 +422,7 @@ int main()
   //Env myEnv(bgColor, dim, g, verticesPerTimestep);
   //myEnv.Render();
   //myEnv.Start();
-  std::vector<int> myvertices(verticesPerTimestep.size());
-  for (int i = 0; i < myvertices.size(); ++i) {
-    myvertices[i] = verticesPerTimestep[i];
-  }
-
-  GraphManager gm(dim, 10, 10, 10, 0);
-  GraphViewer gv = GraphViewer(g2, myvertices, bgColor, dim);
+  GraphViewer gv = GraphViewer(gm, bgColor, dim);
   gv.Render();
   gv.Start();
 

@@ -55,12 +55,10 @@ void KeypressCallbackFunction (
 }
 
 GraphViewer::GraphViewer (
-    Graph &g,
-    std::vector<int> verticesPerTimestep,
+    GraphManager &gm,
     std::vector<double> bgColor,
     std::vector<int> dim) :
-  _g(g),
-  _verticesPerTimestep(verticesPerTimestep),
+  _gm(gm),
   _bgColor(bgColor),
   _dim(dim),
   _renderer(vtkSmartPointer<vtkRenderer>::New()),
@@ -79,9 +77,19 @@ GraphViewer::GraphViewer (
   _cubeGlyph3D(vtkSmartPointer<vtkGlyph3D>::New()),
   _cubeMapper(vtkSmartPointer<vtkPolyDataMapper>::New()),
   _cubeActor(vtkSmartPointer<vtkActor>::New()),
+  _concPoints(vtkSmartPointer<vtkPoints>::New()),
+  _concColors(vtkSmartPointer<vtkUnsignedCharArray>::New()),
+  _concPolyData(vtkSmartPointer<vtkPolyData>::New()),
+  _concSource(vtkSmartPointer<vtkCubeSource>::New()),
+  _concGlyph3D(vtkSmartPointer<vtkGlyph3D>::New()),
+  _concMapper(vtkSmartPointer<vtkPolyDataMapper>::New()),
+  _concActor(vtkSmartPointer<vtkActor>::New()),
   _formIndex(0),
   _form(),
-  _vertexPair(vertices(_g))
+  _EForm(),
+  _OForm(),
+  _GForm(),
+  _LForm()
 {
   // Set the object flow for the vtk window
   _renderWindow->AddRenderer(_renderer);
@@ -158,6 +166,9 @@ void GraphViewer::initCubes()
   _cubePolyData->SetPoints(_cubePoints);
   _cubePolyData->GetPointData()->SetScalars(_cubeColors);
   _cubeGlyph3D->SetColorModeToColorByScalar();
+  _cubeSource->SetXLength(0.8);
+  _cubeSource->SetYLength(0.8);
+  _cubeSource->SetZLength(0.8);
   _cubeGlyph3D->SetSourceConnection(_cubeSource->GetOutputPort());
 #if VTK_MAJOR_VERSION <= 5
   _cubeGlyph3D->SetInput(_cubePolyData);
@@ -170,6 +181,27 @@ void GraphViewer::initCubes()
   _cubeActor->SetMapper(_cubeMapper);
  
   _renderer->AddActor(_cubeActor);
+
+  _concColors->SetName("_concColors");
+  // Combine into a _concPolyData
+  _concPolyData->SetPoints(_concPoints);
+  _concPolyData->GetPointData()->SetScalars(_concColors);
+  _concGlyph3D->SetColorModeToColorByScalar();
+  _concSource->SetXLength(0.4);
+  _concSource->SetYLength(0.4);
+  _concSource->SetZLength(0.4);
+  _concGlyph3D->SetSourceConnection(_concSource->GetOutputPort());
+#if VTK_MAJOR_VERSION <= 5
+  _concGlyph3D->SetInput(_concPolyData);
+#else
+  _concGlyph3D->SetInputData(_concPolyData);
+#endif
+  _concGlyph3D->ScalingOff();
+  // Create a _concMapper and _concActor
+  _concMapper->SetInputConnection(_concGlyph3D->GetOutputPort());
+  _concActor->SetMapper(_concMapper);
+ 
+  _renderer->AddActor(_concActor);
 }
 
 int GraphViewer::getFormIndex() const
@@ -180,21 +212,11 @@ int GraphViewer::getFormIndex() const
 void GraphViewer::setFormIndex(int newFormIndex)
 {
   // Count the total number of form in the graph
-  int maxForm = std::accumulate(
-      _verticesPerTimestep.begin(),
-      _verticesPerTimestep.end(),
-      0);
+  int maxForm = _gm.getMaxNbrOfForm();
   // Count the difference from the current form index and the new form index
-  int inc = std::min(std::max(0, newFormIndex), maxForm-1) - _formIndex;
-  // Get the new form
-  _vertexPair.first += inc;
-  _form = _g[*_vertexPair.first];
-  // Count the maximum number of cell that the space can contains
-  int maxCell = std::accumulate(_dim.begin(), _dim.end(), 1, std::multiplies<int>());
-  // Verify if the number of cell in the form is correct
-  if (_form.size() != maxCell) _form.resize(maxCell, 0);
-  // Set the new index
-  _formIndex += inc;
+  newFormIndex = std::min(std::max(0, newFormIndex), maxForm-1);
+  _formIndex = newFormIndex;
+  _gm.getFormFromGraph(newFormIndex, _gm.getGForm(), _form, _EForm, _OForm, _GForm, _LForm);
 
   drawForm();
 }
@@ -204,6 +226,10 @@ void GraphViewer::resizeCubes(int size)
   _cubePoints->SetNumberOfPoints(size);
   _cubeColors->SetNumberOfComponents(3);
   _cubeColors->SetNumberOfTuples(size);
+
+  _concPoints->SetNumberOfPoints(size*4);
+  _concColors->SetNumberOfComponents(3);
+  _concColors->SetNumberOfTuples(size*4);
 }
 
 void GraphViewer::getXYZ(
@@ -225,10 +251,34 @@ void OutputPoints(vtkSmartPointer<vtkPoints> points)
     cout << p[0] << " " << p[1] << " " << p[2] << endl;
     }
 }
+
+void printColor(const std::vector<unsigned char> &color)
+{
+  std::cout << "color[r, g, b] : " << std::dec << (int)color[0] << " "
+                                   << std::dec << (int)color[1] << " "
+                                   << std::dec << (int)color[2] << std::endl;
+}
+
+void GraphViewer::linearColorGradient(
+    const std::vector<double> &compConcentration,
+    int pos,
+    std::vector<unsigned char> &color)
+{
+  assert(color.size() == 3);
+  //std::cout << "cc : " << compConcentration.size() << std::endl;
+  //std::cout << "pos" << pos << std::endl;
+  assert(compConcentration.size() > pos);
+  double maxi = *(std::max_element(compConcentration.begin(), compConcentration.end()));
+  maxi = std::max(maxi, (double)0);
+  double currentCon = compConcentration[pos];
+  //std::cout << "maxi : " << maxi << std::endl;
+  color[0] = (unsigned char)(std::max(currentCon, (double)0)*255/maxi);
+  color[1] = 0;
+  color[2] = 255 - color[0];
+}
+
 void GraphViewer::drawForm()
 {
-  unsigned char r[3] = {255,0,0};
- 
    //Check the number of cubes, resize if different
   if (_form.count() != _cubePoints->GetNumberOfPoints())
   {
@@ -239,25 +289,52 @@ void GraphViewer::drawForm()
   int x, y, z;
 
   std::cout << "New Form at index : " << _formIndex << std::endl;
-  unsigned char color[3] = {255, 0, 0};
-  for (vtkIdType i = 0; i < _cubePoints->GetNumberOfPoints(); ++i) {
+  int maxNbrPoints = _cubePoints->GetNumberOfPoints();
+  for (vtkIdType i = 0; i < maxNbrPoints; ++i) {
     //std::cout << "find 1 at " << pos << std::endl;
+    
+    std::vector<unsigned char> color(3, 0);
+    color[0] = 0;
+    color[1] = 255;
+    color[2] = 0;
+    
     if (pos != -1)
     {
+      //linearColorGradient(_CForm, pos, color);
       if (i == 0) firstPos = pos;
       getXYZ(pos, x, y, z);
-      _cubePoints->SetPoint(i, x, y, z);
-      _cubeColors->SetTupleValue(i, color);
+      //printColor(color);
     } else {
+      //linearColorGradient(_CForm, firstPos, color);
       getXYZ(firstPos, x, y, z);
-      _cubePoints->SetPoint(i, x, y, z);
-      _cubeColors->SetTupleValue(i, color);
     }
-
+    _cubePoints->SetPoint(i, x, y, z);
+    _cubeColors->SetTupleValue(i, &color[0]);
     pos = _form.find_next(pos);
+
+    linearColorGradient(_EForm, i, color);
+    getXYZ(i+2*maxNbrPoints, x, y, z);
+    _concPoints->SetPoint(i, x, y, z);
+    _concColors->SetTupleValue(i, &color[0]);
+
+    linearColorGradient(_OForm, i, color);
+    getXYZ(i+3*maxNbrPoints, x, y, z);
+    _concPoints->SetPoint(i+1*maxNbrPoints, x, y, z);
+    _concColors->SetTupleValue(i+1*maxNbrPoints, &color[0]);
+
+    linearColorGradient(_GForm, i, color);
+    getXYZ(i+4*maxNbrPoints, x, y, z);
+    _concPoints->SetPoint(i+2*maxNbrPoints, x, y, z);
+    _concColors->SetTupleValue(i+2*maxNbrPoints, &color[0]);
+
+    linearColorGradient(_LForm, i, color);
+    getXYZ(i+5*maxNbrPoints, x, y, z);
+    _concPoints->SetPoint(i+3*maxNbrPoints, x, y, z);
+    _concColors->SetTupleValue(i+3*maxNbrPoints, &color[0]);
   }
-  OutputPoints(_cubePoints);
+  //OutputPoints(_cubePoints);
   _cubeGlyph3D->Update();
+  _concGlyph3D->Update();
   _renderWindow->Render();
   //std::cout << _cubePoints->GetNumberOfPoints() << std::endl;
   //std::cout << _cubeColors->GetNumberOfPoints() << std::endl;

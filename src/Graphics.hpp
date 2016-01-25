@@ -43,6 +43,7 @@
  * Project include
  */
 #include "environment.h"
+#include "GraphManager.hpp"
 
 /* -----------------------------------------------------------*/
 /** 
@@ -63,8 +64,7 @@ public:
    */
   /* -----------------------------------------------------------*/
   GraphViewer (
-      Graph &g,
-      std::vector<int> verticesPerTimestep,
+      GraphManager &gm,
       std::vector<double> bgColor,
       std::vector<int> dim);
   /* -----------------------------------------------------------*/
@@ -140,6 +140,12 @@ private:
    */
   /* -----------------------------------------------------------*/
   void resizeCubes(int size);
+
+  void linearColorGradient(
+      const std::vector<double> &compConcentration,
+      int pos,
+      std::vector<unsigned char> &color);
+
   /* -----------------------------------------------------------*/
   /** 
    * @brief Convert a form into cubes to be drawn by vtk
@@ -148,8 +154,7 @@ private:
   void drawForm();
 
   /* data */
-  Graph &_g; /*!< graph of form to be drawn*/
-  std::vector<int> _verticesPerTimestep; /*!< number of forms for each level of the graph*/
+  GraphManager &_gm; /*!< graph of form to be drawn*/
   std::vector<double> _bgColor; /*!< background color for the vtk window*/
   std::vector<int> _dim; /*!< Dimension of the 3D space*/
 
@@ -182,7 +187,22 @@ private:
   vtkSmartPointer<vtkPolyDataMapper> _cubeMapper;
   vtkSmartPointer<vtkActor> _cubeActor;
 
+  /**
+   * VTK objects for drawing multiple cubes
+   * Used for drawing a form in the vtk windows
+   */
+  vtkSmartPointer<vtkPoints> _concPoints;
+  vtkSmartPointer<vtkUnsignedCharArray> _concColors;
+  vtkSmartPointer<vtkPolyData> _concPolyData;
+  vtkSmartPointer<vtkCubeSource> _concSource;
+  vtkSmartPointer<vtkGlyph3D> _concGlyph3D;
+  vtkSmartPointer<vtkPolyDataMapper> _concMapper;
+  vtkSmartPointer<vtkActor> _concActor;
+
   int _formIndex; /*!< index of the current form*/
   boost::dynamic_bitset<> _form; /*!< dynamic_bytset of the current form*/
-  pair< vertex_iter, vertex_iter > _vertexPair; /*!< iterator for iterating the graph*/
+  std::vector<double> _EForm; /*!< dynamic_bytset of the current form*/
+  std::vector<double> _OForm; /*!< dynamic_bytset of the current form*/
+  std::vector<double> _GForm; /*!< dynamic_bytset of the current form*/
+  std::vector<double> _LForm; /*!< dynamic_bytset of the current form*/
 };
