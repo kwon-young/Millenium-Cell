@@ -26,12 +26,37 @@ public:
   GraphManager (
       std::vector<int> dim,
       Graph g,
-      double initEneLvl,
-      double initOxyLvl,
-      double initGluLvl,
-      double initLacLvl);
+      double hInGlu,
+      double hInOxy,
+      double hOutEneOxy,
+      double hOutEneNoOxy,
+      double hOutLac,
+      double hLacMitose,
+      double cInGlu,
+      double cInOxy,
+      double cOutEne,
+      double cOutLac,
+      double cLacMitose,
+      double eneMitose);
   virtual ~GraphManager ();
 
+  void healthy_reaction(
+      std::vector<double> &energy,
+      std::vector<double> &oxygen,
+      std::vector<double> &glucose,
+      std::vector<double> &lactate,
+      int pos);
+  void cancerous_reaction(
+      std::vector<double> &energy,
+      std::vector<double> &oxygen,
+      std::vector<double> &glucose,
+      std::vector<double> &lactate,
+      int pos);
+  bool canMitose(
+      int pos,
+      std::vector<double> &energy,
+      std::vector<double> &lactate,
+      bool healthy);
   Graph getGForm() const;
   Vertex add_vertexToGForm(
       boost::dynamic_bitset<> form,
@@ -44,6 +69,9 @@ public:
       Vertex v,
       const graphEdge& p);
   VectorGraph getGEnergy() const;
+  VectorGraph getGOxygen() const;
+  VectorGraph getGGlucose() const;
+  VectorGraph getGLactate() const;
   int getMaxNbrOfForm() const;
   void getFormFromGraph(
       int index,
@@ -60,6 +88,20 @@ private:
   VectorGraph _gOxygen;
   VectorGraph _gGlucose;
   VectorGraph _gLactate;
+
+  /* threshold */
+  double _hInGlu;
+  double _hInOxy;
+  double _hOutEneOxy;
+  double _hOutEneNoOxy;
+  double _hOutLac;
+  double _hLacMitose;
+  double _cInGlu;
+  double _cInOxy;
+  double _cOutEne;
+  double _cOutLac;
+  double _cLacMitose;
+  double _eneMitose;
 };
 
 #endif

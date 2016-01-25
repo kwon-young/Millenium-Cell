@@ -38,9 +38,9 @@ void KeypressCallbackFunction (
    */
   GraphViewer *gv = static_cast<GraphViewer*>(clientData);
   if (!key.compare("Left"))
-    gv->setFormIndex(gv->getFormIndex()-1);
+    gv->setFormIndex(gv->getFormIndex()-10);
   else if (!key.compare("Right"))
-    gv->setFormIndex(gv->getFormIndex()+1);
+    gv->setFormIndex(gv->getFormIndex()+10);
   //Env *env = static_cast<Env*>(clientData);
   //env->updateForms(iren->GetKeySym());
 
@@ -106,7 +106,7 @@ GraphViewer::GraphViewer (
   convertPointGrid();
 
   initCubes();
-  setFormIndex(10);
+  setFormIndex(0);
 }
 
 GraphViewer::~GraphViewer ()

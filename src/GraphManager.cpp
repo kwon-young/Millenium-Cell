@@ -6,28 +6,98 @@
 GraphManager::GraphManager (
       std::vector<int> dim,
       Graph g,
-      double initEneLvl,
-      double initOxyLvl,
-      double initGluLvl,
-      double initLacLvl):
-  _gForm(g)
+      double hInGlu,
+      double hInOxy,
+      double hOutEneOxy,
+      double hOutEneNoOxy,
+      double hOutLac,
+      double hLacMitose,
+      double cInGlu,
+      double cInOxy,
+      double cOutEne,
+      double cOutLac,
+      double cLacMitose,
+      double eneMitose):
+  _gForm(g),
+  _hInGlu(hInGlu),
+  _hInOxy(hInOxy),
+  _hOutEneOxy(hOutEneOxy),
+  _hOutEneNoOxy(hOutEneNoOxy),
+  _hOutLac(hOutLac),
+  _hLacMitose(hLacMitose),
+  _cInGlu(cInGlu),
+  _cInOxy(cInOxy),
+  _cOutEne(cOutEne),
+  _cOutLac(cOutLac),
+  _cLacMitose(cLacMitose),
+  _eneMitose(eneMitose)
 {
-  int maxCell = std::accumulate(dim.begin(), dim.end(), 1, std::multiplies<int>());
-  std::cout << "max nbr of form : " << getMaxNbrOfForm() << std::endl;
-  for (int i = 0; i < getMaxNbrOfForm(); ++i) {
-    std::vector<double> energy(maxCell, initEneLvl-i);
-    std::vector<double> oxygen(maxCell, initEneLvl-i);
-    std::vector<double> glucose(maxCell, initEneLvl-i);
-    std::vector<double> lactate(maxCell, initEneLvl-i);
-    boost::add_vertex(energy, _gEnergy);
-    boost::add_vertex(oxygen, _gOxygen);
-    boost::add_vertex(glucose, _gGlucose);
-    boost::add_vertex(lactate, _gLactate);
-  }
 }
 
 GraphManager::~GraphManager()
 {}
+
+void GraphManager::healthy_reaction(
+    std::vector<double> &energy,
+    std::vector<double> &oxygen,
+    std::vector<double> &glucose,
+    std::vector<double> &lactate,
+    int pos)
+{
+  if(glucose[pos] >= _hInGlu)
+  {
+    glucose[pos] -= _hInGlu;
+    if(oxygen[pos] >= _hInOxy)
+    {
+      oxygen[pos] -= _hInOxy;
+      energy[pos] += _hOutEneOxy;
+    } else {
+      lactate[pos] += _hOutLac;
+      energy[pos] += _hOutEneNoOxy;
+    }
+  }
+}
+
+void GraphManager::cancerous_reaction(
+    std::vector<double> &energy,
+    std::vector<double> &oxygen,
+    std::vector<double> &glucose,
+    std::vector<double> &lactate,
+    int pos)
+{
+  if(glucose[pos] >= _cInGlu)
+  {
+    glucose[pos] -= _cInGlu;
+    if(oxygen[pos] >= _cInOxy)
+    {
+      oxygen[pos] -= _cInOxy;
+    }
+    lactate[pos] += _cOutLac;
+    energy[pos] += _cOutEne;
+  }
+}
+
+bool GraphManager::canMitose(
+    int pos,
+    std::vector<double> &energy,
+    std::vector<double> &lactate,
+    bool healthy)
+{
+  double lacMitose;
+  if (healthy)
+  {
+    lacMitose = _hLacMitose;
+  } else {
+    lacMitose = _cLacMitose;
+  }
+  if (energy[pos] > _eneMitose && lactate[pos] < lacMitose)
+  {
+    energy[pos] -= _eneMitose;
+    return true;
+  } else {
+    return false;
+  }
+}
 
 Graph GraphManager::getGForm() const
 {
@@ -59,6 +129,21 @@ void GraphManager::add_edgeToGForm(
 VectorGraph GraphManager::getGEnergy() const
 {
   return _gEnergy;
+}
+
+VectorGraph GraphManager::getGOxygen() const
+{
+  return _gOxygen;
+}
+
+VectorGraph GraphManager::getGGlucose() const
+{
+  return _gGlucose;
+}
+
+VectorGraph GraphManager::getGLactate() const
+{
+  return _gLactate;
 }
 
 int GraphManager::getMaxNbrOfForm() const

@@ -74,7 +74,12 @@ int main()
   dim[0] = 10;
   dim[1] = 10;
   dim[2] = 1;
-  GraphManager gm(dim, g, 0, 100, 100, 0);
+  bool healthy = true;
+  double initEneLvl=30, initOxyLvl=100, initGluLvl=100, initLacLvl=0;
+  GraphManager gm(dim, g,
+      10, 10, 36, 2, 10, 10,
+      10, 10, 4, 10, 90,
+      10);
   unsigned int timestep; // Records the timesteps
 
   //  unsigned int bridgeTime4 = 3; //Defining the time of crossing constraints
@@ -84,7 +89,7 @@ int main()
 
   unsigned int firstPos = 55; // Specify the first cell's position
 
-  unsigned int maxCell = 4; // Defining the max cells to reach for final forms
+  unsigned int maxCell = 5; // Defining the max cells to reach for final forms
 
   // Dimensions of the grid
   unsigned int width = 10;
@@ -163,11 +168,15 @@ int main()
 
   // Allow to retrieve graph's vertices and iterate on them
   pair< vertex_iter, vertex_iter > vertexPair, vertexPair_prev;
+  pair< vertex_iter, vertex_iter > EvertexPair, EvertexPair_prev;
+  pair< vertex_iter, vertex_iter > OvertexPair, OvertexPair_prev;
+  pair< vertex_iter, vertex_iter > GvertexPair, GvertexPair_prev;
+  pair< vertex_iter, vertex_iter > LvertexPair, LvertexPair_prev;
 
   // Add the starting form to the graph ! This form will represent the root
   //boost::add_vertex(formContainer, g);
   
-  std::vector<double> energy(maxSize, 0), oxygen(maxSize, 100), glucose(maxSize, 100), lactate(maxSize, 0);
+  std::vector<double> energy(maxSize, initEneLvl), oxygen(maxSize, initOxyLvl), glucose(maxSize, initGluLvl), lactate(maxSize, initLacLvl);
   gm.add_vertexToGForm(formContainer, energy, oxygen, glucose, lactate);
 
   // Record the reference of the vertex among those of the same number of cell
@@ -182,24 +191,59 @@ int main()
     countVerticesPerTime = 0;
 
     vertexPair_prev = vertices(gm.getGForm());
+    EvertexPair_prev = vertices(gm.getGEnergy());
+    OvertexPair_prev = vertices(gm.getGOxygen());
+    GvertexPair_prev = vertices(gm.getGGlucose());
+    LvertexPair_prev = vertices(gm.getGLactate());
 
     timestep++;
 
     unsigned int nbVertices = 0;
 
+
     // Loop until each node of previous timestep is processed
     while (nbVertices < verticesPerTimestep[timestep - 1]) {
       // Iterate within the nodes of previous timestep
       --vertexPair_prev.second;
+      --EvertexPair_prev.second;
+      --OvertexPair_prev.second;
+      --GvertexPair_prev.second;
+      --LvertexPair_prev.second;
 
       // Form in the current node to be processed
       boost::dynamic_bitset<> form = gm.getGForm()[*vertexPair_prev.second];
+      energy = gm.getGEnergy()[*EvertexPair_prev.second];
+      oxygen = gm.getGOxygen()[*OvertexPair_prev.second];
+      glucose = gm.getGGlucose()[*GvertexPair_prev.second];
+      lactate = gm.getGLactate()[*LvertexPair_prev.second];
 
       unsigned int nbCells = form.count();
       unsigned int formSize = 0;
 
       unsigned int motherPosition = 0;
 
+      while (motherPosition < maxSize) {
+        if (form[motherPosition]) {
+          if (healthy)
+          {
+            gm.healthy_reaction(
+                energy,
+                oxygen,
+                glucose,
+                lactate,
+                motherPosition);
+          }else{
+            gm.cancerous_reaction(
+                energy,
+                oxygen,
+                glucose,
+                lactate,
+                motherPosition);
+          }
+        }
+        motherPosition++;
+      }
+      motherPosition=0;
       // Process each cell of the form
       while ((motherPosition < maxSize) && (formSize < nbCells)) {
         // If there is a cell in the position c
@@ -211,6 +255,10 @@ int main()
             // Try to trigger a mitosis of the current cell with the current
             // control within the current form
             boost::dynamic_bitset<> mitoForm = form;
+            std::vector<double> mitoEnergy = energy;
+            std::vector<double> mitoOxygen = oxygen;
+            std::vector<double> mitoGlucose = glucose;
+            std::vector<double> mitoLactate = lactate;
             bool mitose = env->mitose(mitoForm, motherPosition, directions[d]);
 
             // Calculating the subset of reachable sets or enforcing the some
@@ -240,6 +288,15 @@ int main()
             //                      }
 
             // If a mitosis is achieved
+            
+            if(mitose) {
+              mitose = gm.canMitose(
+                  motherPosition,
+                  mitoEnergy,
+                  mitoLactate,
+                  healthy);
+            }
+            
             if (mitose) {
               unsigned int newNbCells = mitoForm.count();
 
