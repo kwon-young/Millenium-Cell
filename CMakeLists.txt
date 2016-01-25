@@ -18,6 +18,7 @@ find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})
 
 add_executable(Millenium-Cell src/GraphManager.cpp src/main.cpp src/Graphics.cpp src/environment.cpp )
+#add_executable(Millenium-Cell src/main2.cpp)
 
 if(VTK_LIBRARIES)
   target_link_libraries(Millenium-Cell ${VTK_LIBRARIES})

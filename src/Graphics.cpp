@@ -98,7 +98,7 @@ GraphViewer::GraphViewer (
   convertPointGrid();
 
   initCubes();
-  setFormIndex(0);
+  setFormIndex(10);
 }
 
 GraphViewer::~GraphViewer ()
@@ -153,7 +153,8 @@ void GraphViewer::convertPointGrid()
 
 void GraphViewer::initCubes()
 {
-  _cubeColors->SetName("colors");
+  _cubeColors->SetName("_cubeColors");
+  // Combine into a _cubePolyData
   _cubePolyData->SetPoints(_cubePoints);
   _cubePolyData->GetPointData()->SetScalars(_cubeColors);
   _cubeGlyph3D->SetColorModeToColorByScalar();
@@ -164,8 +165,10 @@ void GraphViewer::initCubes()
   _cubeGlyph3D->SetInputData(_cubePolyData);
 #endif
   _cubeGlyph3D->ScalingOff();
+  // Create a _cubeMapper and _cubeActor
   _cubeMapper->SetInputConnection(_cubeGlyph3D->GetOutputPort());
   _cubeActor->SetMapper(_cubeMapper);
+ 
   _renderer->AddActor(_cubeActor);
 }
 
@@ -199,7 +202,7 @@ void GraphViewer::setFormIndex(int newFormIndex)
 void GraphViewer::resizeCubes(int size)
 {
   _cubePoints->SetNumberOfPoints(size);
-  _cubeColors->SetNumberOfComponents(size);
+  _cubeColors->SetNumberOfComponents(3);
   _cubeColors->SetNumberOfTuples(size);
 }
 
@@ -213,34 +216,47 @@ void GraphViewer::getXYZ(
   y = (pos % (_dim[1]*_dim[0])) / _dim[1];
   z = pos / (_dim[1]*_dim[0]);
 }
-
+void OutputPoints(vtkSmartPointer<vtkPoints> points)
+{
+  for(vtkIdType i = 0; i < points->GetNumberOfPoints(); i++)
+    {
+    double p[3];
+    points->GetPoint(i,p);
+    cout << p[0] << " " << p[1] << " " << p[2] << endl;
+    }
+}
 void GraphViewer::drawForm()
 {
-  // Check the number of cubes, resize if different
+  unsigned char r[3] = {255,0,0};
+ 
+   //Check the number of cubes, resize if different
   if (_form.count() != _cubePoints->GetNumberOfPoints())
   {
-    resizeCubes(_form.count());
+    resizeCubes(_form.size());
   }
   // pos is used for the index of the current cube
-  int pos = _form.find_first();
+  int pos = _form.find_first(), firstPos = 0;
   int x, y, z;
 
+  std::cout << "New Form at index : " << _formIndex << std::endl;
+  unsigned char color[3] = {255, 0, 0};
   for (vtkIdType i = 0; i < _cubePoints->GetNumberOfPoints(); ++i) {
     //std::cout << "find 1 at " << pos << std::endl;
     if (pos != -1)
     {
-      unsigned char color[3] = {255, 0, 0};
+      if (i == 0) firstPos = pos;
       getXYZ(pos, x, y, z);
-      //std::cout << "pos : " << pos << std::endl;
-      //std::cout << x << std::endl;
-      //std::cout << y << std::endl;
-      //std::cout << z << std::endl;
-      //std::cout << "end" << std::endl;
+      _cubePoints->SetPoint(i, x, y, z);
+      _cubeColors->SetTupleValue(i, color);
+    } else {
+      getXYZ(firstPos, x, y, z);
       _cubePoints->SetPoint(i, x, y, z);
       _cubeColors->SetTupleValue(i, color);
     }
+
     pos = _form.find_next(pos);
   }
+  OutputPoints(_cubePoints);
   _cubeGlyph3D->Update();
   _renderWindow->Render();
   //std::cout << _cubePoints->GetNumberOfPoints() << std::endl;
