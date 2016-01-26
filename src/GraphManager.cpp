@@ -145,22 +145,22 @@ void GraphManager::add_edgeToGForm(
   add_edge(u, v, p, _gForm);
 }
 
-VectorGraph GraphManager::getGEnergy() const
+VectorGraph& GraphManager::getGEnergy()
 {
   return _gEnergy;
 }
 
-VectorGraph GraphManager::getGOxygen() const
+VectorGraph& GraphManager::getGOxygen()
 {
   return _gOxygen;
 }
 
-VectorGraph GraphManager::getGGlucose() const
+VectorGraph& GraphManager::getGGlucose()
 {
   return _gGlucose;
 }
 
-VectorGraph GraphManager::getGLactate() const
+VectorGraph& GraphManager::getGLactate()
 {
   return _gLactate;
 }

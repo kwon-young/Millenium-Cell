@@ -13,6 +13,7 @@
 #include <iostream>
 #include <vector>
 #include <numeric>
+#include <algorithm>
 
 //#include <C:/Users/info/Desktop/Viab-Cell/environment.h>
 #include "environment.h"
@@ -75,11 +76,11 @@ int main()
   dim[1] = 10;
   dim[2] = 1;
   bool healthy = true;
-  double initEneLvl=30, initOxyLvl=100, initGluLvl=100, initLacLvl=0;
+  double initEneLvl=0, initOxyLvl=10, initGluLvl=100, initLacLvl=0;
   GraphManager gm(dim, g,
       10, 10, 36, 2, 10, 10,
       10, 10, 4, 10, 90,
-      10);
+      30);
   unsigned int timestep; // Records the timesteps
 
   //  unsigned int bridgeTime4 = 3; //Defining the time of crossing constraints
@@ -89,7 +90,7 @@ int main()
 
   unsigned int firstPos = 55; // Specify the first cell's position
 
-  unsigned int maxCell = 5; // Defining the max cells to reach for final forms
+  unsigned int maxCell = 7; // Defining the max cells to reach for final forms
 
   // Dimensions of the grid
   unsigned int width = 10;
@@ -187,7 +188,10 @@ int main()
 
   // Loop until getting all recheable forms with the right number of cells
   while (timestep + 1 < maxCell) {
+    std::cout << "timestep :" << timestep << std::endl;
+    //std::cout << "countVerticesPerTime : " << countVerticesPerTime << std::endl;
     // Initialize the number of vertices in the current timestep
+    if(countVerticesPerTime == 0) timestep = std::max(((int)timestep)-1, 0);
     countVerticesPerTime = 0;
 
     vertexPair_prev = vertices(gm.getGForm());
@@ -200,9 +204,10 @@ int main()
 
     unsigned int nbVertices = 0;
 
-
+    
     // Loop until each node of previous timestep is processed
     while (nbVertices < verticesPerTimestep[timestep - 1]) {
+      //std::cout << "nbVertices  : " << nbVertices<< std::endl;
       // Iterate within the nodes of previous timestep
       --vertexPair_prev.second;
       --EvertexPair_prev.second;
@@ -240,9 +245,14 @@ int main()
                 lactate,
                 motherPosition);
           }
+          //std::cout << "energy at pos " << motherPosition << ":" << energy[motherPosition] << std::endl;
         }
         motherPosition++;
       }
+      gm.getGEnergy()[*EvertexPair_prev.second] = energy;
+      gm.getGOxygen()[*OvertexPair_prev.second] = oxygen;
+      gm.getGGlucose()[*GvertexPair_prev.second] = glucose;
+      gm.getGLactate()[*LvertexPair_prev.second] = lactate;
       motherPosition=0;
       // Process each cell of the form
       while ((motherPosition < maxSize) && (formSize < nbCells)) {

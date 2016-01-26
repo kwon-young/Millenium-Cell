@@ -70,10 +70,10 @@ public:
       Vertex u,
       Vertex v,
       const graphEdge& p);
-  VectorGraph getGEnergy() const;
-  VectorGraph getGOxygen() const;
-  VectorGraph getGGlucose() const;
-  VectorGraph getGLactate() const;
+  VectorGraph& getGEnergy();
+  VectorGraph& getGOxygen();
+  VectorGraph& getGGlucose();
+  VectorGraph& getGLactate();
   int getMaxNbrOfForm() const;
   void getFormFromGraph(
       int index,
