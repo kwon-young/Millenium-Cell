@@ -94,7 +94,7 @@ public:
 
   /* -----------------------------------------------------------*/
   /** 
-   * @brief Perform render action for vt
+   * @brief Perform render action for vtk
    */
   /* -----------------------------------------------------------*/
   void Render();
@@ -142,17 +142,39 @@ private:
   /* -----------------------------------------------------------*/
   void resizeCubes(int size);
 
+  /* -----------------------------------------------------------*/
+  /** 
+   * @brief Compute a linear gradient color from the concentration
+   * at position pos
+   * 
+   * @param[in] compConcentration : concentration environment
+   * @param[in] pos : position of interest
+   * @param[out] color : linear gradient color computed
+   */
+  /* -----------------------------------------------------------*/
   void linearColorGradient(
       const std::vector<double> &compConcentration,
       int pos,
       std::vector<unsigned char> &color);
 
+  /* -----------------------------------------------------------*/
+  /** 
+   * @brief Compute a linear gradient scale from the concentration
+   * at position pos
+   * 
+   * @param[in] compConcentration : concentration environment
+   * @param[in] pos : position of interest
+   * 
+   * @return linear gradient scale in float
+   */
+  /* -----------------------------------------------------------*/
   float linearScaleGradient(
       const std::vector<double> &compConcentration,
       int pos);
   /* -----------------------------------------------------------*/
   /** 
    * @brief Convert a form into cubes to be drawn by vtk
+   * Convert concentration of energy, oxygen, glucose, lactate in cubes
    */
   /* -----------------------------------------------------------*/
   void drawForm();
@@ -193,11 +215,10 @@ private:
 
   /**
    * VTK objects for drawing multiple cubes
-   * Used for drawing a form in the vtk windows
+   * Used for drawing concentration in the vtk windows
    */
   vtkSmartPointer<vtkPoints> _concPoints;
   vtkSmartPointer<vtkUnsignedCharArray> _concColors;
-  vtkSmartPointer<vtkFloatArray> _concScales;
   vtkSmartPointer<vtkPolyData> _concPolyData;
   vtkSmartPointer<vtkCubeSource> _concSource;
   vtkSmartPointer<vtkGlyph3D> _concGlyph3D;
@@ -206,8 +227,8 @@ private:
 
   int _formIndex; /*!< index of the current form*/
   boost::dynamic_bitset<> _form; /*!< dynamic_bytset of the current form*/
-  std::vector<double> _EForm; /*!< dynamic_bytset of the current form*/
-  std::vector<double> _OForm; /*!< dynamic_bytset of the current form*/
-  std::vector<double> _GForm; /*!< dynamic_bytset of the current form*/
-  std::vector<double> _LForm; /*!< dynamic_bytset of the current form*/
+  std::vector<double> _EForm; /*!< energy of the environment*/
+  std::vector<double> _OForm; /*!< oxygen of the environment*/
+  std::vector<double> _GForm; /*!< glucose of the environment*/
+  std::vector<double> _LForm; /*!< lactate of the environment*/
 };
