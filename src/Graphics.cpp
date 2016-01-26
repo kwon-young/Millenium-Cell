@@ -1,3 +1,9 @@
+/** 
+ * @file Graphics.cpp
+ * @author Kwon-Young Choi
+ * @version 1.0
+ * @date 2016-01-26
+ */
 
 #include "Graphics.hpp"
 

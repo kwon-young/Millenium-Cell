@@ -2,6 +2,8 @@
 
 #include "GraphManager.hpp"
 
+GraphManager::GraphManager()
+{}
 
 GraphManager::GraphManager (
       std::vector<int> dim,
@@ -93,12 +95,14 @@ void GraphManager::init_ressource(
     const boost::dynamic_bitset<> &form)
 {
   int pos = form.find_first();
+  // reset the env concentration to 0
   energy.assign(energy.size(), 0.0);
   oxygen.assign(oxygen.size(), 0.0);
   glucose.assign(glucose.size(), 0.0);
   lactate.assign(lactate.size(), 0.0);
   while(pos != -1)
   {
+    // set initial resources for a cell
     energy[pos] = _initEne;
     oxygen[pos] = _initOxy;
     glucose[pos] = _initGlu;

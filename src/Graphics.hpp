@@ -1,7 +1,7 @@
 /** 
  * @file Graphics.hpp
  * @author Kwon-Young Choi
- * @version 0.1
+ * @version 1.0
  * @date 2016-01-21
  */
 

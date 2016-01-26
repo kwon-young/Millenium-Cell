@@ -71,12 +71,16 @@ int main()
   std::map<unsigned int, std::vector<unsigned int> > verticesPerNbCell;
 
   Graph g;               // defining a graph
+  // dimension of the env
   std::vector<int> dim(3);
   dim[0] = 10;
   dim[1] = 10;
   dim[2] = 1;
+  // type of the cell simulated : true if healthy, false if cancerous
   bool healthy = true;
+  // initial resources for a cell mitosis
   double initEneLvl=0, initOxyLvl=10, initGluLvl=100, initLacLvl=0;
+  // define a graph manager
   GraphManager gm(dim, g,
       initEneLvl, initOxyLvl, initGluLvl, initLacLvl,
       10, 10, 36, 2, 2, 40,
@@ -178,7 +182,10 @@ int main()
   // Add the starting form to the graph ! This form will represent the root
   //boost::add_vertex(formContainer, g);
   
-  std::vector<double> energy(maxSize, initEneLvl), oxygen(maxSize, initOxyLvl), glucose(maxSize, initGluLvl), lactate(maxSize, initLacLvl);
+  std::vector<double> energy(maxSize, initEneLvl);
+  std::vector<double> oxygen(maxSize, initOxyLvl);
+  std::vector<double> glucose(maxSize, initGluLvl);
+  std::vector<double> lactate(maxSize, initLacLvl);
   gm.add_vertexToGForm(formContainer, energy, oxygen, glucose, lactate);
 
   // Record the reference of the vertex among those of the same number of cell
@@ -218,6 +225,7 @@ int main()
 
       // Form in the current node to be processed
       boost::dynamic_bitset<> form = gm.getGForm()[*vertexPair_prev.second];
+      // initialize resources for a form
       gm.init_ressource(energy, oxygen, glucose, lactate, form);
 
       unsigned int nbCells = form.count();
@@ -225,6 +233,7 @@ int main()
 
       unsigned int motherPosition = 0;
 
+      // do healthy or cancerous reaction
       while (motherPosition < maxSize) {
         if (form[motherPosition]) {
           if (healthy)
@@ -292,7 +301,7 @@ int main()
             //                      }
 
             // If a mitosis is achieved
-            
+            // check if a mitosis can be done
             if(mitose) {
               mitose = gm.canMitose(
                   motherPosition,
@@ -324,7 +333,9 @@ int main()
               if (vertex == 0) {
                 // Add the wewly created form in the graph
                 //Vertex formVertex = boost::add_vertex(mitoForm, g);
-                Vertex formVertex = gm.add_vertexToGForm(mitoForm, energy, oxygen, glucose, lactate);
+                // Add the newly created form in the form graph and save the env
+                Vertex formVertex = gm.add_vertexToGForm(mitoForm,
+                    energy, oxygen, glucose, lactate);
 
                 // In the map, record the reference of the vertex among those of
                 // the same number of cell
@@ -425,67 +436,26 @@ int main()
         graphFile<<endl<<endl<<endl;
     }
 
-  //unsigned int cpt = 0, max;
-  //max = std::accumulate(verticesPerTimestep.begin(), verticesPerTimestep.end(), 0);
-  //while(cpt < max)
-  //{
-    //std::cout << cpt << std::endl;
-    //boost::dynamic_bitset<> gform = g[*vertexPair_prev.first];
-    //boost::dynamic_bitset<> form(10*10*2, 0);
-    //for (int i = 0; i < 100; ++i) {
-      //form[i] = gform[i];
-      ////std::cout << form[i];
-      ////if (!(i%10) && i!=0)
-        ////std::cout << std::endl;
-    //}
-    //std::vector<unsigned int> dim(3);
-    //dim[0] = 10;
-    //dim[1] = 10;
-    //dim[2] = 2;
-    //Form myForm(form, dim);
+  // the gm class can be saved with boost::serialize
+  const char* fileName = "saved.txt"; 
+  {
+  // Create an output archive
+  std::ofstream ofs(fileName);
+  boost::archive::text_oarchive ar(ofs);
 
-    //std::vector<double> bgColor(3);
-    //bgColor[0] = .2;
-    //bgColor[1] = .3;
-    //bgColor[2] = .4;
-    //Env myEnv(bgColor, g);
-    //myEnv.addForm(&myForm);
-    //myEnv.renderStart();
-    //++vertexPair_prev.first;
-    //cpt++;
-  //}
-  
-
-  //const char* fileName = "saved.txt"; 
-  //{
-  //// Create an output archive
-  //std::ofstream ofs(fileName);
-  //boost::archive::text_oarchive ar(ofs);
-
-  //// Write data
-  //ar & g;
-  //ar & verticesPerTimestep;
-  //ar & height;
-  //ar & width;
-  //}
-  //std::ifstream ifs(fileName);
-  //boost::archive::text_iarchive ia(ifs);
-  //Graph g2;
-  //ia >> g2;
-
-  std::vector<int> myvertices(verticesPerTimestep.size());
-  for (int i = 0; i < myvertices.size(); ++i) {
-    myvertices[i] = verticesPerTimestep[i];
+  // Write data
+  ar & gm;
   }
+  std::ifstream ifs(fileName);
+  boost::archive::text_iarchive ia(ifs);
+  GraphManager gm2;
+  ia >> gm2;
 
   std::vector<double> bgColor(3);
   bgColor[0] = .2;
   bgColor[1] = .3;
   bgColor[2] = .4;
-  //Env myEnv(bgColor, dim, g, verticesPerTimestep);
-  //myEnv.Render();
-  //myEnv.Start();
-  GraphViewer gv = GraphViewer(gm, bgColor, dim);
+  GraphViewer gv = GraphViewer(gm2, bgColor, dim);
   gv.Render();
   gv.Start();
 
