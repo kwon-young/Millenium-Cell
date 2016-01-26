@@ -183,7 +183,7 @@ void GraphViewer::initCubes()
  
   _renderer->AddActor(_cubeActor);
 
-  //_concColors->SetName("_concColors");
+  _concColors->SetName("_concColors");
   _concScales->SetName("_concScales");
   // Combine into a _concPolyData
   _concPolyData->SetPoints(_concPoints);
@@ -200,7 +200,7 @@ void GraphViewer::initCubes()
 #else
   _concGlyph3D->SetInputData(_concPolyData);
 #endif
-  //_concGlyph3D->ScalingOff();
+  _concGlyph3D->ScalingOff();
   // Create a _concMapper and _concActor
   _concMapper->SetInputConnection(_concGlyph3D->GetOutputPort());
   _concActor->SetMapper(_concMapper);
