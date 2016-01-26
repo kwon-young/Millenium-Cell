@@ -295,7 +295,7 @@ void GraphViewer::linearColorGradient(
   // take maxi from the maximum element of the graph
   //double maxi = *(std::max_element(compConcentration.begin(), compConcentration.end()));
   // take an arbitrary maximum
-  double maxi = 30;
+  double maxi = 36;
   maxi = std::max(maxi, (double)0);
   double currentCon = compConcentration[pos];
   //std::cout << "maxi : " << maxi << std::endl;

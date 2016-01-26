@@ -54,7 +54,7 @@ void GraphManager::healthy_reaction(
     std::vector<double> &lactate,
     int pos)
 {
-  while(glucose[pos] >= _hInGlu)
+  while(glucose[pos] >= _hInGlu && energy[pos] < _eneMitose)
   {
     glucose[pos] -= _hInGlu;
     if(oxygen[pos] >= _hInOxy)
@@ -75,7 +75,7 @@ void GraphManager::cancerous_reaction(
     std::vector<double> &lactate,
     int pos)
 {
-  while(glucose[pos] >= _cInGlu)
+  while(glucose[pos] >= _cInGlu && energy[pos] < _eneMitose)
   {
     glucose[pos] -= _cInGlu;
     if(oxygen[pos] >= _cInOxy)
@@ -126,7 +126,7 @@ bool GraphManager::canMitose(
   } else {
     lacMitose = _cLacMitose;
   }
-  if (energy[pos] > _eneMitose && lactate[pos] < lacMitose)
+  if (energy[pos] >= _eneMitose && lactate[pos] < lacMitose)
   {
     return true;
   } else {

@@ -77,15 +77,15 @@ int main()
   dim[1] = 10;
   dim[2] = 1;
   // type of the cell simulated : true if healthy, false if cancerous
-  bool healthy = true;
+  bool healthy = false;
   // initial resources for a cell mitosis
-  double initEneLvl=0, initOxyLvl=10, initGluLvl=100, initLacLvl=0;
+  double initEneLvl=0, initOxyLvl=6, initGluLvl=18, initLacLvl=0;
   // define a graph manager
   GraphManager gm(dim, g,
       initEneLvl, initOxyLvl, initGluLvl, initLacLvl,
-      10, 10, 36, 2, 2, 40,
-      10, 10, 4, 4, 90,
-      20);
+      1, 6, 36, 2, 2, 40,
+      1, 1, 4, 2, 90,
+      36);
   unsigned int timestep; // Records the timesteps
 
   //  unsigned int bridgeTime4 = 3; //Defining the time of crossing constraints
