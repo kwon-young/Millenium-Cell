@@ -79,6 +79,7 @@ GraphViewer::GraphViewer (
   _cubeActor(vtkSmartPointer<vtkActor>::New()),
   _concPoints(vtkSmartPointer<vtkPoints>::New()),
   _concColors(vtkSmartPointer<vtkUnsignedCharArray>::New()),
+  _concScales(vtkSmartPointer<vtkFloatArray>::New()),
   _concPolyData(vtkSmartPointer<vtkPolyData>::New()),
   _concSource(vtkSmartPointer<vtkCubeSource>::New()),
   _concGlyph3D(vtkSmartPointer<vtkGlyph3D>::New()),
@@ -182,21 +183,24 @@ void GraphViewer::initCubes()
  
   _renderer->AddActor(_cubeActor);
 
-  _concColors->SetName("_concColors");
+  //_concColors->SetName("_concColors");
+  _concScales->SetName("_concScales");
   // Combine into a _concPolyData
   _concPolyData->SetPoints(_concPoints);
-  _concPolyData->GetPointData()->SetScalars(_concColors);
-  _concGlyph3D->SetColorModeToColorByScalar();
-  _concSource->SetXLength(0.4);
-  _concSource->SetYLength(0.4);
-  _concSource->SetZLength(0.4);
+  //_concPolyData->GetPointData()->SetScalars(_concColors);
+  _concPolyData->GetPointData()->SetScalars(_concScales);
+  //_concGlyph3D->SetColorModeToColorByScalar();
+  _concGlyph3D->SetScaleModeToScaleByScalar();
+  //_concSource->SetXLength(0.4);
+  //_concSource->SetYLength(0.4);
+  //_concSource->SetZLength(0.4);
   _concGlyph3D->SetSourceConnection(_concSource->GetOutputPort());
 #if VTK_MAJOR_VERSION <= 5
   _concGlyph3D->SetInput(_concPolyData);
 #else
   _concGlyph3D->SetInputData(_concPolyData);
 #endif
-  _concGlyph3D->ScalingOff();
+  //_concGlyph3D->ScalingOff();
   // Create a _concMapper and _concActor
   _concMapper->SetInputConnection(_concGlyph3D->GetOutputPort());
   _concActor->SetMapper(_concMapper);
@@ -228,8 +232,9 @@ void GraphViewer::resizeCubes(int size)
   _cubeColors->SetNumberOfTuples(size);
 
   _concPoints->SetNumberOfPoints(size*4);
-  _concColors->SetNumberOfComponents(3);
-  _concColors->SetNumberOfTuples(size*4);
+  //_concColors->SetNumberOfComponents(3);
+  //_concColors->SetNumberOfTuples(size*4);
+  _concScales->SetNumberOfValues(size*4);
 }
 
 void GraphViewer::getXYZ(
@@ -277,6 +282,19 @@ void GraphViewer::linearColorGradient(
   color[2] = 255 - color[0];
 }
 
+float GraphViewer::linearScaleGradient(
+    const std::vector<double> &compConcentration,
+    int pos)
+{
+  //std::cout << "cc : " << compConcentration.size() << std::endl;
+  //std::cout << "pos" << pos << std::endl;
+  assert(compConcentration.size() > pos);
+  double maxi = *(std::max_element(compConcentration.begin(), compConcentration.end()));
+  maxi = std::max(maxi, (double)0);
+  double currentCon = compConcentration[pos];
+  //std::cout << "maxi : " << maxi << std::endl;
+  return std::max(currentCon, (double)0)/maxi;
+}
 void GraphViewer::drawForm()
 {
    //Check the number of cubes, resize if different
@@ -297,40 +315,47 @@ void GraphViewer::drawForm()
     color[0] = 0;
     color[1] = 255;
     color[2] = 0;
+    float f;
     
     if (pos != -1)
     {
-      //linearColorGradient(_CForm, pos, color);
       if (i == 0) firstPos = pos;
       getXYZ(pos, x, y, z);
       //printColor(color);
     } else {
-      //linearColorGradient(_CForm, firstPos, color);
       getXYZ(firstPos, x, y, z);
     }
     _cubePoints->SetPoint(i, x, y, z);
     _cubeColors->SetTupleValue(i, &color[0]);
     pos = _form.find_next(pos);
 
-    linearColorGradient(_EForm, i, color);
+    //linearColorGradient(_EForm, i, color);
+    f = linearScaleGradient(_EForm, i);
     getXYZ(i+2*maxNbrPoints, x, y, z);
     _concPoints->SetPoint(i, x, y, z);
-    _concColors->SetTupleValue(i, &color[0]);
+    //_concColors->SetTupleValue(i, &color[0]);
+    _concScales->SetValue(i, f);
 
-    linearColorGradient(_OForm, i, color);
+    //linearColorGradient(_OForm, i, color);
+    f = linearScaleGradient(_OForm, i);
     getXYZ(i+3*maxNbrPoints, x, y, z);
     _concPoints->SetPoint(i+1*maxNbrPoints, x, y, z);
-    _concColors->SetTupleValue(i+1*maxNbrPoints, &color[0]);
+    //_concColors->SetTupleValue(i+1*maxNbrPoints, &color[0]);
+    _concScales->SetValue(i+1*maxNbrPoints, f);
 
-    linearColorGradient(_GForm, i, color);
+    //linearColorGradient(_GForm, i, color);
+    f = linearScaleGradient(_GForm, i);
     getXYZ(i+4*maxNbrPoints, x, y, z);
     _concPoints->SetPoint(i+2*maxNbrPoints, x, y, z);
-    _concColors->SetTupleValue(i+2*maxNbrPoints, &color[0]);
+    //_concColors->SetTupleValue(i+2*maxNbrPoints, &color[0]);
+    _concScales->SetValue(i+2*maxNbrPoints, f);
 
-    linearColorGradient(_LForm, i, color);
+    //linearColorGradient(_LForm, i, color);
+    f = linearScaleGradient(_LForm, i);
     getXYZ(i+5*maxNbrPoints, x, y, z);
     _concPoints->SetPoint(i+3*maxNbrPoints, x, y, z);
-    _concColors->SetTupleValue(i+3*maxNbrPoints, &color[0]);
+    //_concColors->SetTupleValue(i+3*maxNbrPoints, &color[0]);
+    _concScales->SetValue(i+2*maxNbrPoints, f);
   }
   //OutputPoints(_cubePoints);
   _cubeGlyph3D->Update();

@@ -27,6 +27,7 @@
 #include <vtkUnsignedCharArray.h>
 #include <vtkGlyph3D.h>
 #include <vtkPointData.h>
+#include <vtkFloatArray.h>
 
 /**
  * Boost include
@@ -146,6 +147,9 @@ private:
       int pos,
       std::vector<unsigned char> &color);
 
+  float linearScaleGradient(
+      const std::vector<double> &compConcentration,
+      int pos);
   /* -----------------------------------------------------------*/
   /** 
    * @brief Convert a form into cubes to be drawn by vtk
@@ -193,6 +197,7 @@ private:
    */
   vtkSmartPointer<vtkPoints> _concPoints;
   vtkSmartPointer<vtkUnsignedCharArray> _concColors;
+  vtkSmartPointer<vtkFloatArray> _concScales;
   vtkSmartPointer<vtkPolyData> _concPolyData;
   vtkSmartPointer<vtkCubeSource> _concSource;
   vtkSmartPointer<vtkGlyph3D> _concGlyph3D;
