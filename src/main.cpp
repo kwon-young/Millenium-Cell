@@ -78,9 +78,10 @@ int main()
   bool healthy = true;
   double initEneLvl=0, initOxyLvl=10, initGluLvl=100, initLacLvl=0;
   GraphManager gm(dim, g,
-      10, 10, 36, 2, 10, 10,
-      10, 10, 4, 10, 90,
-      30);
+      initEneLvl, initOxyLvl, initGluLvl, initLacLvl,
+      10, 10, 36, 2, 2, 40,
+      10, 10, 4, 4, 90,
+      20);
   unsigned int timestep; // Records the timesteps
 
   //  unsigned int bridgeTime4 = 3; //Defining the time of crossing constraints
@@ -191,7 +192,7 @@ int main()
     std::cout << "timestep :" << timestep << std::endl;
     //std::cout << "countVerticesPerTime : " << countVerticesPerTime << std::endl;
     // Initialize the number of vertices in the current timestep
-    if(countVerticesPerTime == 0) timestep = std::max(((int)timestep)-1, 0);
+    //if(countVerticesPerTime == 0) timestep = std::max(((int)timestep)-1, 0);
     countVerticesPerTime = 0;
 
     vertexPair_prev = vertices(gm.getGForm());
@@ -217,10 +218,7 @@ int main()
 
       // Form in the current node to be processed
       boost::dynamic_bitset<> form = gm.getGForm()[*vertexPair_prev.second];
-      energy = gm.getGEnergy()[*EvertexPair_prev.second];
-      oxygen = gm.getGOxygen()[*OvertexPair_prev.second];
-      glucose = gm.getGGlucose()[*GvertexPair_prev.second];
-      lactate = gm.getGLactate()[*LvertexPair_prev.second];
+      gm.init_ressource(energy, oxygen, glucose, lactate, form);
 
       unsigned int nbCells = form.count();
       unsigned int formSize = 0;
@@ -249,10 +247,10 @@ int main()
         }
         motherPosition++;
       }
-      gm.getGEnergy()[*EvertexPair_prev.second] = energy;
-      gm.getGOxygen()[*OvertexPair_prev.second] = oxygen;
-      gm.getGGlucose()[*GvertexPair_prev.second] = glucose;
-      gm.getGLactate()[*LvertexPair_prev.second] = lactate;
+      //gm.getGEnergy()[*EvertexPair_prev.second] = energy;
+      //gm.getGOxygen()[*OvertexPair_prev.second] = oxygen;
+      //gm.getGGlucose()[*GvertexPair_prev.second] = glucose;
+      //gm.getGLactate()[*LvertexPair_prev.second] = lactate;
       motherPosition=0;
       // Process each cell of the form
       while ((motherPosition < maxSize) && (formSize < nbCells)) {
@@ -265,10 +263,6 @@ int main()
             // Try to trigger a mitosis of the current cell with the current
             // control within the current form
             boost::dynamic_bitset<> mitoForm = form;
-            std::vector<double> mitoEnergy = energy;
-            std::vector<double> mitoOxygen = oxygen;
-            std::vector<double> mitoGlucose = glucose;
-            std::vector<double> mitoLactate = lactate;
             bool mitose = env->mitose(mitoForm, motherPosition, directions[d]);
 
             // Calculating the subset of reachable sets or enforcing the some
@@ -304,8 +298,8 @@ int main()
                   motherPosition,
                   directions[d],
                   dim,
-                  mitoEnergy,
-                  mitoLactate,
+                  energy,
+                  lactate,
                   healthy);
             }
             
@@ -318,13 +312,13 @@ int main()
               // generated form,
               // test if there is any redundance, also with geometrical
               // transformation
-              //if (verticesPerNbCell[newNbCells].size() != 0)
-                //vertex = env->existInGraph(g, mitoForm,
-                                           //verticesPerNbCell[newNbCells]);
-              //else
-                //vertex = 0;
+              if (verticesPerNbCell[newNbCells].size() != 0)
+                vertex = env->existInGraph(gm.getGForm(), mitoForm,
+                                           verticesPerNbCell[newNbCells]);
+              else
+                vertex = 0;
               // do not check if form already exist
-              vertex = 0;
+              //vertex = 0;
 
               // If there is no redundance
               if (vertex == 0) {

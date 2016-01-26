@@ -6,6 +6,10 @@
 GraphManager::GraphManager (
       std::vector<int> dim,
       Graph g,
+      double initEne,
+      double initOxy,
+      double initGlu,
+      double initLac,
       double hInGlu,
       double hInOxy,
       double hOutEneOxy,
@@ -19,6 +23,10 @@ GraphManager::GraphManager (
       double cLacMitose,
       double eneMitose):
   _gForm(g),
+  _initEne(initEne),
+  _initOxy(initOxy),
+  _initGlu(initGlu),
+  _initLac(initLac),
   _hInGlu(hInGlu),
   _hInOxy(hInOxy),
   _hOutEneOxy(hOutEneOxy),
@@ -44,7 +52,7 @@ void GraphManager::healthy_reaction(
     std::vector<double> &lactate,
     int pos)
 {
-  if(glucose[pos] >= _hInGlu)
+  while(glucose[pos] >= _hInGlu)
   {
     glucose[pos] -= _hInGlu;
     if(oxygen[pos] >= _hInOxy)
@@ -65,7 +73,7 @@ void GraphManager::cancerous_reaction(
     std::vector<double> &lactate,
     int pos)
 {
-  if(glucose[pos] >= _cInGlu)
+  while(glucose[pos] >= _cInGlu)
   {
     glucose[pos] -= _cInGlu;
     if(oxygen[pos] >= _cInOxy)
@@ -74,6 +82,28 @@ void GraphManager::cancerous_reaction(
     }
     lactate[pos] += _cOutLac;
     energy[pos] += _cOutEne;
+  }
+}
+
+void GraphManager::init_ressource(
+    std::vector<double> &energy,
+    std::vector<double> &oxygen,
+    std::vector<double> &glucose,
+    std::vector<double> &lactate,
+    const boost::dynamic_bitset<> &form)
+{
+  int pos = form.find_first();
+  energy.assign(energy.size(), 0.0);
+  oxygen.assign(oxygen.size(), 0.0);
+  glucose.assign(glucose.size(), 0.0);
+  lactate.assign(lactate.size(), 0.0);
+  while(pos != -1)
+  {
+    energy[pos] = _initEne;
+    oxygen[pos] = _initOxy;
+    glucose[pos] = _initGlu;
+    lactate[pos] = _initLac;
+    pos = form.find_next(pos);
   }
 }
 
@@ -86,22 +116,6 @@ bool GraphManager::canMitose(
     bool healthy)
 {
   double lacMitose;
-  int poseMitose = pos;
-  switch (dir) {
-    case 'd': {
-       poseMitose -= dim[0];
-    } break;
-
-    case 'u': {
-        poseMitose += dim[0];
-    } break;
-    case 'l': {
-        poseMitose += 1;
-    } break;
-    case 'r': {
-        poseMitose -= 1;
-    } break;
-  }
   if (healthy)
   {
     lacMitose = _hLacMitose;
@@ -110,8 +124,6 @@ bool GraphManager::canMitose(
   }
   if (energy[pos] > _eneMitose && lactate[pos] < lacMitose)
   {
-    energy[pos] -= _eneMitose;
-    energy[poseMitose] += _eneMitose;
     return true;
   } else {
     return false;

@@ -26,6 +26,10 @@ public:
   GraphManager (
       std::vector<int> dim,
       Graph g,
+      double initEne,
+      double initOxy,
+      double initGlu,
+      double initLac,
       double hInGlu,
       double hInOxy,
       double hOutEneOxy,
@@ -52,6 +56,12 @@ public:
       std::vector<double> &glucose,
       std::vector<double> &lactate,
       int pos);
+  void init_ressource(
+      std::vector<double> &energy,
+      std::vector<double> &oxygen,
+      std::vector<double> &glucose,
+      std::vector<double> &lactate,
+      const boost::dynamic_bitset<> &form);
   bool canMitose(
       int pos,
       char dir,
@@ -92,6 +102,10 @@ private:
   VectorGraph _gLactate;
 
   /* threshold */
+  double _initEne;
+  double _initOxy;
+  double _initGlu;
+  double _initLac;
   double _hInGlu;
   double _hInOxy;
   double _hOutEneOxy;
